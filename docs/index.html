@@ -586,8 +586,7 @@ document.getElementById('resumeText').addEventListener('input', function(){
 });
 
 // ========== LOCAL STORAGE ==========
-const savedKey = localStorage.getItem('api_key_openai');
-if (savedKey) document.getElementById('apiKey').value = savedKey;
+// API Key 由 initProvider() 在页面加载时恢复，此处只绑定变更保存
 document.getElementById('apiKey').addEventListener('change', function(){
   const provider = document.getElementById('providerSelect').value;
   localStorage.setItem('api_key_' + provider, this.value);
@@ -635,6 +634,13 @@ function safeParseJSON(text) {
 }
 
 // ========== OPENAI-COMPATIBLE API CALL ==========
+function fetchWithTimeout(url, options, timeoutMs = 180000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
 async function callOpenAI(systemPrompt, userMessage) {
   const provider = document.getElementById('providerSelect').value;
   const cfg = PROVIDERS[provider];
@@ -664,7 +670,7 @@ async function callOpenAI(systemPrompt, userMessage) {
     body.messages[0].content = systemPrompt + '\n\n你必须只返回一个合法 JSON 对象，不要使用 markdown 代码块包裹。';
   }
 
-  const resp = await fetch(cfg.baseUrl + '/chat/completions', {
+  const resp = await fetchWithTimeout(cfg.baseUrl + '/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -824,7 +830,10 @@ async function handleJdFileUpload(event) {
     }
     document.getElementById('jdCount').textContent = document.getElementById('jdText').value.length;
   } catch (e) {
-    showError('JD 文件解析失败: ' + e.message);
+    const errMsg = e.name === 'AbortError'
+      ? '图片 OCR 超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
+      : ('JD 文件解析失败: ' + e.message);
+    showError(errMsg);
     area.classList.remove('has-file');
     preview.style.display = 'none';
   }
@@ -842,7 +851,7 @@ async function extractImageText(file) {
   if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
   const model = document.getElementById('modelSelect').value;
 
-  const resp = await fetch(cfg.baseUrl + '/chat/completions', {
+  const resp = await fetchWithTimeout(cfg.baseUrl + '/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1040,7 +1049,10 @@ async function startGenerate() {
     document.getElementById('reportArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch (err) {
-    showError(err.message || '生成过程中发生错误');
+    const msg = err.name === 'AbortError'
+      ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
+      : (err.message || '生成过程中发生错误');
+    showError(msg);
     const currentStep = ['step-jd','step-gap','step-coding','step-intro','step-qa','step-resource','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
@@ -1263,33 +1275,7 @@ function renderChapter3(intro) {
     return;
   }
 
-  // Tab radio buttons
-  const tabWrap = el('div', {className:'tab-wrap'});
-  const tabContents = [];
-  intro.versions.forEach((v, i) => {
-    const id = 'intro-tab-'+i;
-    const radio = el('input', {type:'radio',name:'introTab',id,className:'tab-radio'});
-    if (i === 0) radio.checked = true;
-    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' · ' + v.target_scenario);
-    tabWrap.append(radio, label);
-
-    const content = el('div', {className:'tab-content'},
-      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:2,marginBottom:'10px',whiteSpace:'pre-wrap'}}, v.script),
-      v.key_highlights?.length ? el('div', null,
-        el('strong', {style:{fontSize:'.85rem'}}, '核心亮点：'),
-        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}},
-          ...v.key_highlights.map(h => el('span',{className:'tag tag-green'}, h))
-        )
-      ) : null
-    );
-    tabContents.push(content);
-    // CSS trick: checked radio triggers sibling display
-    const wrapper = el('div', {style:{display:'inline'}}, radio, label, content);
-    tabWrap.append(radio, label, content);
-  });
-
-  // Clean up - only add one set
-  container.innerHTML = '';
+  // 使用 CSS-only tab 切换方案
   const tabContainer = el('div', null);
   const styleTag = document.createElement('style');
   styleTag.textContent = `
@@ -1467,7 +1453,7 @@ function renderChapter5(coding) {
         el('div', {className:'code-block'}, p.reference_code_snippet)
       ) : null,
 
-      p.complexity_analysis ? el('div', {style:{marginTop:'6px',fontSize:.82,color:'#64748b'}},
+      p.complexity_analysis ? el('div', {style:{marginTop:'6px',fontSize:'.82rem',color:'#64748b'}},
         el('em', null, p.complexity_analysis)
       ) : null,
 

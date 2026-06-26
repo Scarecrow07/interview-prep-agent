@@ -56,6 +56,8 @@ a{color:var(--c-accent);text-decoration:none}
 .file-upload-area .file-info{display:none;font-size:.82rem;color:var(--c-success);font-weight:600}
 .file-upload-area.has-file .upload-icon,.file-upload-area.has-file .upload-text,.file-upload-area.has-file .upload-hint{display:none}
 .file-upload-area.has-file .file-info{display:block}
+/* ========== Image Preview ========== */
+.img-preview{max-width:100%;max-height:160px;border-radius:4px;margin-top:6px;display:none;object-fit:contain;background:var(--c-bg)}
 /* ========== Provider Badge ========== */
 .provider-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:4px;font-size:.72rem;font-weight:600}
 .provider-badge.openai{background:#dbeafe;color:#1d4ed8}
@@ -275,8 +277,16 @@ details[open] .qa-summary::before{content:'−'}
   <div class="form-row">
     <div class="form-group">
       <label for="jdText">职位描述 (JD) <span style="color:#e74c3c">*</span></label>
-      <textarea id="jdText" placeholder="粘贴 JD 文本内容（支持中英文）"></textarea>
+      <textarea id="jdText" placeholder="粘贴 JD 文本内容，或直接上传文件/图片"></textarea>
       <div class="char-count"><span id="jdCount">0</span> 字符</div>
+      <div class="file-upload-area" id="jdFileUploadArea">
+        <input type="file" id="jdFile" accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp" onchange="handleJdFileUpload(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">点击或拖拽上传<br>支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong> <strong>图片</strong></div>
+        <div class="upload-hint">图片会自动 OCR 提取文字</div>
+        <div class="file-info" id="jdFileInfo"><span id="jdFileName"></span> 已上传</div>
+      </div>
+      <img class="img-preview" id="jdImgPreview">
     </div>
     <div class="form-group">
       <label for="resumeText">简历 <span style="color:#e74c3c">*</span></label>
@@ -723,6 +733,120 @@ function loadScript(src) {
     document.head.appendChild(s);
   });
 }
+
+// ========== JD FILE UPLOAD + IMAGE OCR ==========
+async function handleJdFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const area = document.getElementById('jdFileUploadArea');
+  const preview = document.getElementById('jdImgPreview');
+  document.getElementById('jdFileName').textContent = file.name;
+  area.classList.add('has-file');
+  preview.style.display = 'none';
+
+  const isImage = /\.(png|jpg|jpeg|webp)$/i.test(file.name);
+
+  try {
+    if (file.name.endsWith('.txt')) {
+      const text = await file.text();
+      document.getElementById('jdText').value = text;
+    } else if (file.name.endsWith('.pdf')) {
+      const text = await extractPdfText(file);
+      document.getElementById('jdText').value = text;
+    } else if (file.name.endsWith('.docx')) {
+      const text = await extractDocxText(file);
+      document.getElementById('jdText').value = text;
+    } else if (isImage) {
+      // 显示图片预览
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.style.display = 'block';
+
+      // 调用 LLM 视觉 API 提取文字
+      setProgress(10, '正在从图片中提取 JD 文字...');
+      const text = await extractImageText(file);
+      document.getElementById('jdText').value = text;
+    }
+    document.getElementById('jdCount').textContent = document.getElementById('jdText').value.length;
+  } catch (e) {
+    showError('JD 文件解析失败: ' + e.message);
+    area.classList.remove('has-file');
+    preview.style.display = 'none';
+  }
+}
+
+async function extractImageText(file) {
+  // 读取图片为 base64
+  const base64 = await fileToBase64(file);
+  const mime = file.type || 'image/png';
+  const dataUrl = `data:${mime};base64,${base64}`;
+
+  const provider = document.getElementById('providerSelect').value;
+  const cfg = PROVIDERS[provider];
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
+  const model = document.getElementById('modelSelect').value;
+
+  const resp = await fetch(cfg.baseUrl + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: model,
+      temperature: 0.1,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: '请从这张图片中提取完整的职位描述（JD）文字内容，包括岗位名称、职责要求、任职条件等所有信息。只返回提取的文字，不要额外说明。' },
+            { type: 'image_url', image_url: { url: dataUrl } }
+          ]
+        }
+      ],
+      max_tokens: 4096
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(`${cfg.name} 视觉识别失败: ${err.error?.message || resp.status}`);
+  }
+
+  const data = await resp.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error(`${cfg.name} 响应为空`);
+  return content.trim();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// 拖拽上传 (JD)
+const jdUploadArea = document.getElementById('jdFileUploadArea');
+jdUploadArea.addEventListener('dragover', e => { e.preventDefault(); jdUploadArea.classList.add('dragover'); });
+jdUploadArea.addEventListener('dragleave', () => jdUploadArea.classList.remove('dragover'));
+jdUploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  jdUploadArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    document.getElementById('jdFile').files = e.dataTransfer.files;
+    handleJdFileUpload({ target: { files: e.dataTransfer.files } });
+  }
+});
 
 // 拖拽上传
 const uploadArea = document.getElementById('fileUploadArea');

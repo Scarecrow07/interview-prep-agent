@@ -515,15 +515,17 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
   self_intro: `你是一位面试辅导专家。你的任务是基于 JD 分析和差距分析结果，生成适合该候选人的自我介绍脚本。
 
 请遵循以下原则：
-1. 每个版本突出不同侧重点，都必须：先简要介绍背景，突出与 JD 最匹配的核心优势（引用具体数据或项目），展示热情，结尾过渡到面试环节。
-2. 1分钟：突出最重要的2-3个亮点
-3. 2分钟：适度展开，兼顾技术能力和项目经验
-4. 3分钟：完整展示职业发展脉络
-5. 避免暴露明显短板，将潜在短板转化为学习意愿
-6. 每个时长生成两版脚本：formal（正式版，用词严谨，适合正式面试场景）和 casual（口语自然版，用词轻松自然，像和朋友聊天，减少背稿感）
+1. 必须生成恰好3个版本，时长分别为1分钟、2分钟、3分钟，不得遗漏任何一个。
+2. 每个版本突出不同侧重点，都必须：先简要介绍背景，突出与 JD 最匹配的核心优势（引用具体数据或项目），展示热情，结尾过渡到面试环节。
+3. 1分钟版本：约200-250字，突出最重要的2-3个亮点，语速正常可读完
+4. 2分钟版本：约400-500字，适度展开，兼顾技术能力和项目经验
+5. 3分钟版本：约600-750字，完整展示职业发展脉络，含技术成长和职业规划
+6. 避免暴露明显短板，将潜在短板转化为学习意愿
+7. 每个时长生成两版脚本：formal_script（正式版，用词严谨，适合正式面试场景）和 casual_script（口语自然版，用词轻松自然，像和朋友聊天，减少背稿感）
+8. formal_script 和 casual_script 必须是完整的自我介绍文本，不得使用省略号或占位符
 
 输出为 JSON，包含：
-- versions: 数组，每项含 {duration(1min/2min/3min), target_scenario(适用场景), formal_script(正式版完整脚本), casual_script(口语自然版完整脚本), key_highlights(亮点数组)}
+- versions: 数组，必须包含3项，每项含 {duration("1分钟"/"2分钟"/"3分钟"), target_scenario(适用场景), formal_script(正式版完整脚本，不得省略), casual_script(口语自然版完整脚本，不得省略), key_highlights(亮点数组)}
 - usage_tips: 表达技巧与注意事项数组
 - common_mistakes_to_avoid: 应避免的常见错误数组`,
 
@@ -1634,7 +1636,14 @@ function el(tag, attrs, ...children) {
     else if (k === 'innerHTML') e.innerHTML = v;
     else e.setAttribute(k, v);
   });
-  children.forEach(c => { if (c != null) e.append(typeof c === 'string' ? document.createTextNode(c) : c); });
+  children.forEach(c => {
+    if (c == null) return;
+    if (Array.isArray(c)) {
+      c.forEach(sub => { if (sub != null) e.append(typeof sub === 'string' ? document.createTextNode(sub) : sub); });
+    } else {
+      e.append(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+  });
   return e;
 }
 

@@ -87,14 +87,18 @@ a{color:var(--c-accent);text-decoration:none}
 .btn-primary:hover:not(:disabled):not(:active){box-shadow:0 4px 12px rgba(37,99,235,.35);transform:translateY(-1px)}
 .btn-primary:active:not(:disabled){transform:translateY(0)}
 .btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-download{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--c-border);border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;background:var(--c-surface);color:var(--c-text-primary);-webkit-tap-highlight-color:transparent}
+.btn-download:hover{background:var(--c-bg);border-color:var(--c-accent);color:var(--c-accent)}
+.btn-download:active{transform:translateY(0)}
+.download-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 /* ========== Progress ========== */
 .progress-area{display:none;margin-top:20px;background:var(--c-surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
 .progress-area.visible{display:block}
 .progress-bar-track{width:100%;height:6px;background:var(--c-border-light);border-radius:3px;overflow:hidden;margin-bottom:6px}
 .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--c-accent),var(--c-success));border-radius:3px;transition:width .5s ease;width:0%}
 .progress-text{font-size:.82rem;color:var(--c-text-secondary);text-align:center;margin-bottom:10px}
-.progress-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.progress-step{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;border-radius:var(--radius-sm);font-size:.72rem;color:var(--c-text-muted);text-align:center;transition:all .2s;line-height:1.3}
+.progress-steps{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;border-radius:var(--radius-sm);font-size:.68rem;color:var(--c-text-muted);text-align:center;transition:all .2s;line-height:1.25}
 .progress-step .step-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;transition:all .2s}
 .progress-step.pending .step-icon{background:var(--c-border-light);color:var(--c-text-muted)}
 .progress-step.running{background:var(--c-accent-light);color:var(--c-accent);font-weight:600}
@@ -195,7 +199,7 @@ details[open] .qa-summary::before{content:'−'}
   .input-section{padding:18px;margin-top:-24px}
   .config-row{grid-template-columns:1fr 1fr;gap:8px}
   .config-row .form-group:nth-child(3){grid-column:span 2}
-  .progress-steps{grid-template-columns:repeat(2,1fr)}
+  .progress-steps{grid-template-columns:repeat(3,1fr)}
   .skills-grid{grid-template-columns:1fr}
   .resource-grid{grid-template-columns:1fr}
 }
@@ -216,8 +220,8 @@ details[open] .qa-summary::before{content:'−'}
   .report h2{font-size:1.05rem}
   .card{padding:14px;border-radius:var(--radius-sm)}
   .card-title{font-size:.9rem}
-  .progress-steps{grid-template-columns:1fr 1fr 1fr 1fr}
-  .progress-step{font-size:.65rem;padding:4px 2px}
+  .progress-steps{grid-template-columns:repeat(3,1fr)}
+  .progress-step{font-size:.62rem;padding:4px 2px}
   .progress-step .step-icon{width:18px;height:18px;font-size:.55rem}
   .intro-tabs{flex-direction:column}
   .intro-tabs .tab-label{width:100%;text-align:center}
@@ -234,7 +238,7 @@ details[open] .qa-summary::before{content:'−'}
 }
 /* ========== Print ========== */
 @media print{
-  .input-section,.config-row,.btn,.progress-area,.error-banner,.footer,.header .badge{display:none!important}
+  .input-section,.config-row,.btn,.btn-download,.download-bar,.progress-area,.error-banner,.footer,.header .badge{display:none!important}
   .report.visible{display:block!important}
   body{background:#fff;color:#000;font-size:12pt}
   .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid;padding:12px}
@@ -341,10 +345,11 @@ details[open] .qa-summary::before{content:'−'}
       <div class="progress-step" id="step-precheck"><span class="step-icon">✓</span> 输入校验</div>
       <div class="progress-step" id="step-jd"><span class="step-icon">1</span> JD 分析</div>
       <div class="progress-step" id="step-gap"><span class="step-icon">2</span> 匹配分析</div>
-      <div class="progress-step" id="step-coding"><span class="step-icon">3</span> 编码题</div>
-      <div class="progress-step" id="step-intro"><span class="step-icon">4</span> 自我介绍</div>
-      <div class="progress-step" id="step-qa"><span class="step-icon">5</span> 面试问答</div>
+      <div class="progress-step" id="step-intro"><span class="step-icon">3</span> 自我介绍</div>
+      <div class="progress-step" id="step-qa"><span class="step-icon">4</span> 面试问答</div>
+      <div class="progress-step" id="step-coding"><span class="step-icon">5</span> 编码题</div>
       <div class="progress-step" id="step-resource"><span class="step-icon">6</span> 学习资料</div>
+      <div class="progress-step" id="step-verify"><span class="step-icon">7</span> 准确性校验</div>
       <div class="progress-step" id="step-render"><span class="step-icon">☆</span> 渲染报告</div>
     </div>
   </div>
@@ -353,7 +358,7 @@ details[open] .qa-summary::before{content:'−'}
 <!-- ========== REPORT ========== -->
 <div class="report" id="reportArea">
 
-<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
   <div>
     <div style="font-size:.85rem;color:#94a3b8">面试准备方案</div>
     <div style="font-size:1.2rem;font-weight:700;color:#1e293b" id="reportTitle">报告</div>
@@ -361,6 +366,10 @@ details[open] .qa-summary::before{content:'−'}
   <div style="text-align:right;font-size:.8rem;color:#94a3b8">
     <div>生成时间：<span id="reportTime">-</span></div>
     <div>候选人：<span id="reportCandidate">-</span></div>
+    <div class="download-bar">
+      <button class="btn-download" onclick="downloadReportHTML()">📄 下载 HTML</button>
+      <button class="btn-download" onclick="downloadReportMD()">📝 下载 Markdown</button>
+    </div>
   </div>
 </div>
 
@@ -508,7 +517,23 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 - resources: 数组，每项含 {resource_type, title, target_skill, reason, url_or_reference(或null), estimated_time_required(或null), priority(high/medium/low), difficulty_level(beginner/intermediate/advanced)}
 - study_plan_summary: 3-5天学习路径
 - crash_plan_24h: 数组，每项含 {time_slot: 时段(如"第1-2小时"), focus_skill: 聚焦技能, task: 具体任务, key_points: 核心要点数组, expected_outcome: 预期效果}
-- key_knowledge_points: 重点知识要点数组`
+- key_knowledge_points: 重点知识要点数组`,
+
+  verify_agent: `你是一位面试准备方案的质量审核专家。你的任务是校验已生成的面试准备方案的准确性和一致性。
+
+请检查以下维度：
+1. 一致性：自我介绍中提到的亮点是否与匹配分析的优势一致
+2. 覆盖性：面试问题是否覆盖了 JD 中的核心技能和差距领域
+3. 准确性：编码题难度是否与匹配度等级匹配
+4. 完整性：学习资料是否覆盖了所有已识别的差距
+5. 针对性：各模块内容是否针对该候选人的具体情况
+
+输出为 JSON，包含：
+- overall_quality_score: 整体质量评分 (0-100)
+- consistency_checks: 数组，每项含 {check_item: 检查项, status: pass/warning/fail, detail: 说明}
+- identified_issues: 数组，发现的问题列表（每项为字符串）
+- improvement_suggestions: 数组，改进建议
+- final_verdict: 最终结论 (ready/needs_attention/needs_revision)`
 };
 
 // ========== PROVIDER CONFIG ==========
@@ -997,7 +1022,7 @@ async function startGenerate() {
   document.getElementById('reportTime').textContent = new Date().toLocaleString('zh-CN');
   document.getElementById('reportCandidate').textContent = candidateName;
 
-  const steps = ['step-precheck','step-jd','step-gap','step-coding','step-intro','step-qa','step-resource','step-render'];
+  const steps = ['step-precheck','step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-verify','step-render'];
   steps.forEach(s => setStep(s, 'pending'));
 
   let results = {};
@@ -1025,14 +1050,14 @@ async function startGenerate() {
     );
     results.gap = gapResult;
     setStep('step-gap', 'done');
-    setProgress(45, '匹配分析完成，等待确认...');
+    setProgress(35, '匹配分析完成，等待确认...');
 
     // --- Phase 1 complete: render JD analysis and gap analysis for user review ---
     renderChapter1(results.jd);
     renderChapter2(results.gap);
     document.getElementById('reportArea').classList.add('visible');
 
-    // Show confirmation banner
+    // Show confirmation banner with supplement input
     showConfirmation(results, candidateName, jobType, jdText, resumeText);
 
     // Store context for phase 2
@@ -1048,7 +1073,7 @@ async function startGenerate() {
       ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
       : (err.message || '生成过程中发生错误');
     showError(msg);
-    const currentStep = ['step-jd','step-gap','step-coding','step-intro','step-qa','step-resource','step-render']
+    const currentStep = ['step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-verify','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
   }
@@ -1073,12 +1098,36 @@ async function continueGenerate() {
 
   const { candidateName, jobType, jdText, resumeText, jdResult, gapResult } = ctx;
 
+  // Capture user supplement notes
+  const supplementInput = document.getElementById('supplementNotes');
+  const userNotes = supplementInput ? supplementInput.value.trim() : '';
+
   try {
     // Hide confirmation banner
     const confirmBanner = document.getElementById('confirmBanner');
     if (confirmBanner) confirmBanner.classList.remove('visible');
 
-    // Step 3: Coding (conditional)
+    // Step 3: Self Intro
+    setStep('step-intro', 'running');
+    setProgress(40, '生成自我介绍...');
+    const introPromptExtra = userNotes ? '\n\n【候选人补充说明】\n' + userNotes : '';
+    const introResult = await callOpenAIWithRetry(PROMPTS.self_intro,
+      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'?'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'?'}\n项目: ${((gapResult.resume_summary||{}).notable_projects||[]).join('; ')}\n\n请生成适合该候选人的自我介绍方案，每个时长需要正式版和口语自然版两版脚本。${introPromptExtra}`
+    );
+    results.intro = introResult;
+    setStep('step-intro', 'done');
+    setProgress(50, '生成面试问答...');
+
+    // Step 4: Q&A
+    setStep('step-qa', 'running');
+    const qaResult = await callOpenAIWithRetry(PROMPTS.qa_generator,
+      `【简历原文】\n${resumeText}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成全面的面试问答题库，每道题必须包含 2-3 层递进式追问链。${introPromptExtra}`
+    );
+    results.qa = qaResult;
+    setStep('step-qa', 'done');
+    setProgress(60, '生成编码题...');
+
+    // Step 5: Coding (conditional)
     const isTech = jobType === 'tech' ||
       (jobType === 'unknown' && jdResult.hard_skills && jdResult.hard_skills.length > 0 &&
        (jdResult.position_title.toLowerCase().includes('开发') ||
@@ -1091,12 +1140,11 @@ async function continueGenerate() {
 
     if (isTech) {
       setStep('step-coding', 'running');
-      setProgress(50, '生成编码题...');
       const techSkills = (jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ');
       const matchScore = gapResult.overall_match_score || 0;
       const matchLevel = matchScore > 80 ? '高(>80%)' : matchScore >= 60 ? '中(60-80%)' : '低(<60%)';
-      const codingResult = await callOpenAI(PROMPTS.coding_agent,
-        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'未知'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请根据以上匹配度信息调整编码题难度比例。匹配度${matchLevel}。`
+      const codingResult = await callOpenAIWithRetry(PROMPTS.coding_agent,
+        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'未知'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请根据以上匹配度信息调整编码题难度比例。匹配度${matchLevel}。${introPromptExtra}`
       );
       results.coding = codingResult;
       setStep('step-coding', 'done');
@@ -1104,36 +1152,27 @@ async function continueGenerate() {
       results.coding = null;
       setStep('step-coding', 'done');
     }
-    setProgress(60, '自我介绍生成...');
-
-    // Step 4: Self Intro
-    setStep('step-intro', 'running');
-    const introResult = await callOpenAI(PROMPTS.self_intro,
-      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'?'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'?'}\n项目: ${((gapResult.resume_summary||{}).notable_projects||[]).join('; ')}\n\n请生成适合该候选人的自我介绍方案，每个时长需要正式版和口语自然版两版脚本。`
-    );
-    results.intro = introResult;
-    setStep('step-intro', 'done');
-    setProgress(70, '生成面试问答...');
-
-    // Step 5: Q&A
-    setStep('step-qa', 'running');
-    const qaResult = await callOpenAI(PROMPTS.qa_generator,
-      `【简历原文】\n${resumeText}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成全面的面试问答题库，每道题必须包含 2-3 层递进式追问链。`
-    );
-    results.qa = qaResult;
-    setStep('step-qa', 'done');
-    setProgress(85, '推荐学习资料...');
+    setProgress(70, '推荐学习资料...');
 
     // Step 6: Resources
     setStep('step-resource', 'running');
-    const resourceResult = await callOpenAI(PROMPTS.resource_agent,
-      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源，并额外生成面试前24小时速成方案。`
+    const resourceResult = await callOpenAIWithRetry(PROMPTS.resource_agent,
+      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源，并额外生成面试前24小时速成方案。${introPromptExtra}`
     );
     results.resources = resourceResult;
     setStep('step-resource', 'done');
-    setProgress(95, '渲染报告...');
+    setProgress(80, '结果准确性校验...');
 
-    // Step 7: Render
+    // Step 7: Consistency verification
+    setStep('step-verify', 'running');
+    const verifyResult = await callOpenAIWithRetry(PROMPTS.verify_agent,
+      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n\n请校验以上面试准备方案的准确性和一致性。`
+    );
+    results.verify = verifyResult;
+    setStep('step-verify', 'done');
+    setProgress(90, '渲染报告...');
+
+    // Step 8: Render
     setStep('step-render', 'running');
     renderReport(results, candidateName);
     setStep('step-render', 'done');
@@ -1147,13 +1186,33 @@ async function continueGenerate() {
       ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
       : (err.message || '生成过程中发生错误');
     showError(msg);
-    const currentStep = ['step-coding','step-intro','step-qa','step-resource','step-render']
+    const currentStep = ['step-intro','step-qa','step-coding','step-resource','step-verify','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
   }
 
   isGenerating = false;
   resetBtn();
+}
+
+// ========== callOpenAI with retry on JSON parse failure ==========
+async function callOpenAIWithRetry(systemPrompt, userMessage, maxRetries = 2) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await callOpenAI(systemPrompt + (attempt > 0 ? '\n\n注意：上次返回的 JSON 格式有误，请务必返回一个合法的 JSON 对象，不要使用 markdown 代码块包裹，不要在 JSON 外添加任何文字。' : ''), userMessage);
+    } catch (e) {
+      lastError = e;
+      if (e.message.includes('JSON 解析失败') || e.message.includes('LLM 返回格式异常')) {
+        if (attempt < maxRetries) {
+          console.warn(`JSON 解析失败，第 ${attempt + 1} 次重试...`);
+          continue;
+        }
+      }
+      throw e;
+    }
+  }
+  throw lastError;
 }
 
 // ========== Show confirmation banner after phase 1 ==========
@@ -1164,16 +1223,29 @@ function showConfirmation(results, candidateName, jobType, jdText, resumeText) {
     document.querySelector('.progress-area').after(banner);
   }
   banner.innerHTML = '';
+  banner.style.flexDirection = 'column';
+  banner.style.alignItems = 'stretch';
   banner.append(
-    el('div', {className:'confirm-icon'}, '✅'),
-    el('div', {className:'confirm-text'},
-      el('strong', null, 'JD 分析和匹配分析已完成'),
-      el('p', {style:{fontSize:'.82rem',color:'#64748b',marginTop:'4px'}},
-        '请查看上方报告的第 1、2 章，确认分析结果是否符合预期。'),
-      el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginTop:'2px'}},
-        '如需修正，可直接修改 JD/简历文本后重新生成；确认无误后点击继续。')
+    el('div', {style:{display:'flex',alignItems:'flex-start',gap:'12px',marginBottom:'12px'}},
+      el('div', {className:'confirm-icon'}, '✅'),
+      el('div', {className:'confirm-text'},
+        el('strong', null, 'JD 分析和匹配分析已完成'),
+        el('p', {style:{fontSize:'.82rem',color:'#64748b',marginTop:'4px'}},
+          '请查看上方报告的第 1、2 章，确认分析结果是否符合预期。'),
+        el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginTop:'2px'}},
+          '如需修正，可直接修改 JD/简历文本后重新生成；确认无误后点击继续。')
+      )
     ),
-    el('div', {className:'confirm-actions'},
+    el('div', {style:{marginBottom:'12px'}},
+      el('label', {htmlFor:'supplementNotes', style:{fontSize:'.82rem',fontWeight:600,color:'#374151',display:'block',marginBottom:'6px'}}, '补充说明（可选）'),
+      el('textarea', {
+        id:'supplementNotes',
+        placeholder:'如有需要补充或纠正的信息，请在此说明。例如："我有Kafka生产经验但简历中未体现"、"岗位偏重系统设计而非编码"',
+        style:{width:'100%',minHeight:'70px',padding:'8px 10px',border:'1px solid #d1d5db',borderRadius:'6px',fontSize:'.82rem',resize:'vertical',boxSizing:'border-box',fontFamily:'inherit'}
+      }),
+      el('p', {style:{fontSize:'.72rem',color:'#94a3b8',marginTop:'4px'}}, '补充信息将传递给后续所有生成步骤，帮助更精准地定制方案。')
+    ),
+    el('div', {className:'confirm-actions', style:{textAlign:'right'}},
       el('button', {
         className:'btn btn-primary',
         onclick: continueGenerate
@@ -1193,7 +1265,7 @@ function resetBtn() {
 
 // ========== RENDER FUNCTIONS ==========
 function renderReport(results, candidateName) {
-  const { jd, gap, intro, qa, coding, resources } = results;
+  const { jd, gap, intro, qa, coding, resources, verify } = results;
 
   renderChapter1(jd);
   renderChapter2(gap);
@@ -1202,6 +1274,208 @@ function renderReport(results, candidateName) {
   renderChapter5(coding);
   renderChapter6(resources);
   renderMockGuide(qa, intro, gap);
+  renderVerifySection(verify);
+}
+
+// ========== Render verification section ==========
+function renderVerifySection(verify) {
+  let section = document.getElementById('verifySection');
+  if (!section) {
+    section = el('section', {id:'verifySection', className:'report-section'});
+    document.querySelector('.report').append(section);
+  }
+  section.innerHTML = '';
+  if (!verify) {
+    section.append(el('div', {className:'none-notice'}, '校验结果暂未生成'));
+    return;
+  }
+
+  const scoreColor = (verify.overall_quality_score || 0) >= 80 ? '#22c55e' : (verify.overall_quality_score || 0) >= 60 ? '#f59e0b' : '#ef4444';
+  const verdictLabels = { ready: '✅ 方案就绪', needs_attention: '⚠️ 需关注', needs_revision: '❌ 建议修改' };
+  const verdictColors = { ready: '#22c55e', needs_attention: '#f59e0b', needs_revision: '#ef4444' };
+  const verdict = verify.final_verdict || 'needs_attention';
+
+  const checkItems = (verify.consistency_checks || []).map(c => {
+    const icons = { pass: '✓', warning: '⚠', fail: '✗' };
+    const colors = { pass: '#22c55e', warning: '#f59e0b', fail: '#ef4444' };
+    return el('div', {style:{display:'flex',alignItems:'flex-start',gap:'8px',marginBottom:'6px',fontSize:'.82rem'}},
+      el('span', {style:{color:colors[c.status]||'#64748b',fontWeight:700,flexShrink:0}}, icons[c.status] || '•'),
+      el('span', {style:{fontWeight:600}}, c.check_item + '：'),
+      el('span', {style:{color:'#64748b'}}, c.detail || '')
+    );
+  });
+
+  const issueItems = (verify.identified_issues || []).map(i =>
+    el('li', {style:{fontSize:'.8rem',color:'#dc2626',marginBottom:'4px'}}, i)
+  );
+
+  const suggestionItems = (verify.improvement_suggestions || []).map(s =>
+    el('li', {style:{fontSize:'.8rem',color:'#3b82f6',marginBottom:'4px'}}, s)
+  );
+
+  section.append(
+    el('div', {className:'card', style:{borderTop:'4px solid '+(verdictColors[verdict]||'#64748b')}},
+      el('div', {className:'card-title'}, '🔍 结果准确性与一致性校验'),
+      el('div', {style:{display:'flex',alignItems:'center',gap:'16px',marginBottom:'14px'}},
+        el('div', {style:{textAlign:'center'}},
+          el('div', {style:{fontSize:'2rem',fontWeight:800,color:scoreColor}}, String(verify.overall_quality_score || '--')),
+          el('div', {style:{fontSize:'.72rem',color:'#94a3b8'}}, '整体质量评分')
+        ),
+        el('div', {style:{padding:'6px 14px',borderRadius:'6px',background:verdictColors[verdict]||'#64748b',color:'#fff',fontSize:'.82rem',fontWeight:600}},
+          verdictLabels[verdict] || verdict)
+      ),
+      checkItems.length ? el('div', {style:{marginBottom:'12px'}},
+        el('strong', {style:{fontSize:'.82rem'}}, '检查项：'),
+        ...checkItems
+      ) : null,
+      issueItems.length ? el('div', {style:{marginBottom:'12px'}},
+        el('strong', {style:{fontSize:'.82rem',color:'#dc2626'}}, '发现的问题：'),
+        el('ul', {style:{marginTop:'6px',paddingLeft:'20px'}}, ...issueItems)
+      ) : null,
+      suggestionItems.length ? el('div', null,
+        el('strong', {style:{fontSize:'.82rem',color:'#3b82f6'}}, '改进建议：'),
+        el('ul', {style:{marginTop:'6px',paddingLeft:'20px'}}, ...suggestionItems)
+      ) : null
+    )
+  );
+}
+
+// ========== Report download ==========
+function downloadReportHTML() {
+  const reportEl = document.querySelector('.report');
+  if (!reportEl) return;
+  const candidateName = document.getElementById('reportCandidate')?.textContent || '候选人';
+  const reportTime = document.getElementById('reportTime')?.textContent || '';
+
+  // Clone report and extract text content
+  const clone = reportEl.cloneNode(true);
+  // Remove print-hidden elements
+  clone.querySelectorAll('.no-print, .progress-area, .input-section, .confirm-banner, button, .error-banner').forEach(e => e.remove());
+
+  const styles = `<style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans CJK SC','WenQuanYi Micro Hei',sans-serif;max-width:960px;margin:0 auto;padding:20px;color:#1e293b;line-height:1.6}
+    h1{color:#1e293b;border-bottom:3px solid #3b82f6;padding-bottom:8px}
+    h2{color:#3b82f6;margin-top:24px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+    h3{color:#64748b;margin-top:16px}
+    .card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin:10px 0}
+    .card-title{font-weight:700;font-size:1rem;margin-bottom:8px}
+    .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.78rem;margin:2px}
+    .tag-green{background:#d1fae5;color:#065f46}
+    .tag-blue{background:#dbeafe;color:#1d4ed8}
+    .tag-orange{background:#fef3c7;color:#92400e}
+    .tag-red{background:#fee2e2;color:#991b1b}
+    table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.88rem}
+    th,td{border:1px solid #e2e8f0;padding:6px 10px;text-align:left}
+    th{background:#f1f5f9;font-weight:600}
+    pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;overflow-x:auto;font-size:.82rem}
+    code{background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:.85rem}
+    .match-ring{display:inline-block;width:60px;height:60px;border-radius:50%;border:4px solid #3b82f6;text-align:center;line-height:52px;font-weight:700;font-size:1.1rem}
+    details{margin:8px 0;padding:8px;border:1px solid #e2e8f0;border-radius:6px}
+    summary{cursor:pointer;font-weight:600}
+    .none-notice{color:#94a3b8;font-style:italic;padding:12px}
+    @media print{body{max-width:none}}
+  </style>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${candidateName} · 面试准备方案</title>
+${styles}
+</head>
+<body>
+<h1>${candidateName} · 面试准备方案</h1>
+<p style="color:#94a3b8;font-size:.82rem">生成时间：${reportTime}</p>
+${clone.innerHTML}
+<hr>
+<p style="color:#94a3b8;font-size:.78rem;text-align:center">AI 面试准备方案生成器 | 基于 LLM 自动分析，仅供参考</p>
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (candidateName || '面试准备方案') + '_面试准备方案.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadReportMD() {
+  const candidateName = document.getElementById('reportCandidate')?.textContent || '候选人';
+  const reportTime = document.getElementById('reportTime')?.textContent || '';
+  const reportEl = document.querySelector('.report');
+  if (!reportEl) return;
+
+  function nodeToMD(node, depth) {
+    let md = '';
+    depth = depth || 0;
+    node.childNodes.forEach(child => {
+      if (child.nodeType === 3) {
+        const text = child.textContent.trim();
+        if (text) md += text + ' ';
+      } else if (child.nodeType === 1) {
+        const tag = child.tagName;
+        const text = child.textContent.trim();
+        if (!text) return;
+        if (tag === 'H1') md += '\n# ' + text + '\n\n';
+        else if (tag === 'H2') md += '\n## ' + text + '\n\n';
+        else if (tag === 'H3') md += '\n### ' + text + '\n\n';
+        else if (tag === 'H4') md += '\n#### ' + text + '\n\n';
+        else if (tag === 'P') md += text + '\n\n';
+        else if (tag === 'PRE') md += '\n```\n' + child.textContent + '\n```\n\n';
+        else if (tag === 'TABLE') {
+          const rows = child.querySelectorAll('tr');
+          rows.forEach((row, ri) => {
+            const cells = Array.from(row.querySelectorAll('th,td')).map(c => c.textContent.trim());
+            md += '| ' + cells.join(' | ') + ' |\n';
+            if (ri === 0) md += '| ' + cells.map(()=>'---').join(' | ') + ' |\n';
+          });
+          md += '\n';
+        } else if (tag === 'UL' || tag === 'OL') {
+          child.querySelectorAll(':scope > li').forEach(li => {
+            md += '- ' + li.textContent.trim() + '\n';
+          });
+          md += '\n';
+        } else if (tag === 'DETAILS') {
+          md += '\n**' + (child.querySelector('summary')?.textContent || '详情') + '**\n\n';
+          child.querySelectorAll(':scope > :not(summary)').forEach(sub => {
+            md += nodeToMD(sub, depth+1);
+          });
+        } else if (tag === 'DIV' || tag === 'SECTION') {
+          md += nodeToMD(child, depth+1);
+        } else if (tag === 'STRONG') {
+          md += '**' + text + '** ';
+        } else if (tag === 'CODE') {
+          md += '`' + text + '` ';
+        } else {
+          md += text + ' ';
+        }
+      }
+    });
+    return md;
+  }
+
+  let md = `# ${candidateName} · 面试准备方案\n\n> 生成时间：${reportTime}\n\n`;
+  // Process each chapter section
+  const sections = reportEl.querySelectorAll('.report-section');
+  if (sections.length === 0) {
+    md += nodeToMD(reportEl, 0);
+  } else {
+    sections.forEach(section => {
+      md += nodeToMD(section, 0) + '\n---\n\n';
+    });
+  }
+  md += '\n---\n*AI 面试准备方案生成器 | 基于 LLM 自动分析，仅供参考*\n';
+
+  const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (candidateName || '面试准备方案') + '_面试准备方案.md';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ========== Mock Interview Practice Guide ==========

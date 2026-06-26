@@ -251,8 +251,8 @@ details[open] .qa-summary::before{content:'−'}
     <div class="form-group">
       <label for="providerSelect">API 提供商</label>
       <select id="providerSelect" onchange="onProviderChange()">
+        <option value="deepseek" selected>DeepSeek (默认)</option>
         <option value="openai">OpenAI</option>
-        <option value="deepseek">DeepSeek</option>
         <option value="kimi">Kimi（月之暗面）</option>
         <option value="qwen">Qwen（阿里云百炼）</option>
         <option value="doubao">Doubao（火山引擎）</option>
@@ -263,7 +263,7 @@ details[open] .qa-summary::before{content:'−'}
       <select id="modelSelect"></select>
     </div>
     <div class="form-group" style="flex:1.5">
-      <label for="apiKey">API Key <span class="provider-badge openai" id="providerBadge">OpenAI</span> <a id="portalLink" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="portal-link">获取 API Key ↗</a></label>
+      <label for="apiKey">API Key <span class="provider-badge deepseek" id="providerBadge">DeepSeek</span> <a id="portalLink" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" class="portal-link">获取 API Key ↗</a></label>
       <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
     </div>
     <div class="form-group">
@@ -569,12 +569,8 @@ let isGenerating = false;
 
 // ========== INIT ==========
 function initProvider() {
-  // 初始化模型下拉列表
-  const provider = document.getElementById('providerSelect').value;
-  updateModelOptions(provider);
-  // 恢复 localStorage 中的 API Key（按 provider 分别存）
-  const savedKey = localStorage.getItem('api_key_' + provider);
-  if (savedKey) document.getElementById('apiKey').value = savedKey;
+  // 默认 DeepSeek，直接调用 onProviderChange 完成全部初始化
+  onProviderChange();
 }
 function updateModelOptions(provider) {
   const cfg = PROVIDERS[provider];

@@ -328,7 +328,7 @@ details[open] .qa-summary::before{content:'−'}
     <input type="text" id="candidateName" placeholder="如：张三">
   </div>
 
-  <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()">
+  <button class="btn btn-primary" id="generateBtn" type="button" onclick="startGenerate()">
     🚀 生成面试准备方案
   </button>
 </section>
@@ -718,7 +718,7 @@ async function callOpenAI(systemPrompt, userMessage) {
   // 判断当前模型是否支持 response_format: json_object
   const supportsJsonMode =
     provider === 'openai' ||
-    (provider === 'deepseek' && model !== 'deepseek-reasoner');
+    (provider === 'deepseek' && model !== 'deepseek-reasoner' && model !== 'deepseek-v4-pro');
 
   const body = {
     model: model,
@@ -1035,7 +1035,7 @@ async function startGenerate() {
     // Step 1: JD Analysis
     setStep('step-jd', 'running');
     setProgress(15, '正在分析 JD...');
-    const jdResult = await callOpenAI(PROMPTS.jd_analyzer,
+    const jdResult = await callOpenAIWithRetry(PROMPTS.jd_analyzer,
       `请分析以下职位描述（JD）：\n\n${jdText}`
     );
     results.jd = jdResult;
@@ -1045,7 +1045,7 @@ async function startGenerate() {
     // Step 2: Gap Analysis
     setStep('step-gap', 'running');
     const jdSummary = `【JD分析摘要】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n级别: ${jdResult.role_level}`;
-    const gapResult = await callOpenAI(PROMPTS.gap_analyzer,
+    const gapResult = await callOpenAIWithRetry(PROMPTS.gap_analyzer,
       jdSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + '\n\n请进行详细的匹配分析。'
     );
     results.gap = gapResult;
@@ -1134,6 +1134,7 @@ async function continueGenerate() {
         jdResult.position_title.toLowerCase().includes('工程师') ||
         jdResult.position_title.toLowerCase().includes('算法') ||
         jdResult.position_title.toLowerCase().includes('数据') ||
+        jdResult.position_title.toLowerCase().includes('挖掘') ||
         jdResult.position_title.toLowerCase().includes('后端') ||
         jdResult.position_title.toLowerCase().includes('前端') ||
         jdResult.position_title.toLowerCase().includes('全栈')));
@@ -1489,15 +1490,15 @@ function renderMockGuide(qa, intro, gap) {
 
   const practiceQuestions = (qa?.questions || []).slice(0, 3).map((q, i) =>
     el('div', {style:{marginBottom:'10px',padding:'10px',background:'var(--c-bg)',borderRadius:'6px'}},
-      el('div', {style:{fontWeight:600,fontSize:'.85rem',marginBottom:'4px'}}, `练习 ${i+1}：${q.question_text}`),
+      el('div', {style:{fontWeight:600,fontSize:'.85rem',marginBottom:'4px'}}, `练习 ${i+1}：${q.question_text || q.question || ''}`),
       el('div', {style:{fontSize:'.78rem',color:'#64748b'}}, `考察维度：${q.evaluation_dimension || '综合'} · 建议时长：${q.suggested_time_limit || '5分钟'}`),
       q.follow_up_chain?.length ? el('div', {style:{fontSize:'.78rem',color:'#3b82f6',marginTop:'4px'}},
-        '追问链：' + q.follow_up_chain.map(fc => fc.follow_up_question).join(' → ')
+        '追问链：' + (q.follow_up_chain || []).map(fc => fc.follow_up_question || fc.question || '').filter(Boolean).join(' → ')
       ) : null
     )
   );
 
-  const introVersions = (intro?.versions || []).map(v => v.duration + '（' + v.target_scenario + '）').join('、');
+  const introVersions = (intro?.versions || []).map(v => v.duration + '（' + (v.target_scenario || v.scenario || '通用') + '）').join('、');
 
   section.append(
     el('div', {className:'card', style:{borderTop:'4px solid #6366f1'}},
@@ -1654,25 +1655,26 @@ function renderChapter2(gap) {
     ),
     rs.notable_projects?.length ? el('div', {style:{marginTop:'8px',fontSize:'.9rem'}},
       el('strong', null, '突出项目：'),
-      el('ul', null, ...rs.notable_projects.map(p => el('li', null, p)))
+      el('ul', null, ...(rs.notable_projects || []).map(p => el('li', null, p)))
     ) : null
   );
   container.append(summaryCard);
 
-  // Match details table
-  if (gap.skill_match_details && gap.skill_match_details.length) {
-    const rows = gap.skill_match_details.map(s => {
-      const statusLabel = {matched:'匹配', partial:'部分匹配', gap:'差距', not_mentioned:'未提及'}[s.match_status] || s.match_status;
+  // Match details table (support both new and old field names)
+  const matchDetails = gap.skill_match_details || gap.skill_matches || [];
+  if (matchDetails.length) {
+    const rows = matchDetails.map(s => {
+      const statusLabel = {matched:'匹配', partial:'部分匹配', gap:'差距', not_mentioned:'未提及'}[s.match_status || s.status] || s.match_status || s.status || '';
       return el('tr', null,
-        el('td', {style:{fontWeight:600}}, s.skill_name),
+        el('td', {style:{fontWeight:600}}, s.skill_name || s.skill || ''),
         el('td', null, el('span',{className:'tag tag-gray'}, s.skill_type==='tech'?'技术':s.skill_type==='soft'?'软技能':'领域')),
-        el('td', null, s.requirement_level),
+        el('td', null, s.requirement_level || s.proficiency_level || ''),
         el('td', null, s.candidate_level || '-'),
         el('td', null,
-          el('span',{className:'status-dot '+s.match_status}),
+          el('span',{className:'status-dot '+(s.match_status || s.status || '')}),
           statusLabel
         ),
-        el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, s.gap_description || '')
+        el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, s.gap_description || s.detail || '')
       );
     });
     const card = el('div', {className:'card'},
@@ -1741,7 +1743,7 @@ function renderChapter3(intro) {
     const id = 'intro-tab-' + (Date.now() + i);
     const radio = el('input', {type:'radio',name:'introTab',id,className:'tab-radio'});
     if (i === 0) radio.checked = true;
-    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' - ' + v.target_scenario);
+    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' - ' + (v.target_scenario || v.scenario || '通用'));
 
     // Support both new format (formal_script/casual_script) and old format (script)
     const hasDual = v.formal_script || v.casual_script;
@@ -1779,7 +1781,7 @@ function renderChapter3(intro) {
       v.key_highlights?.length ? el('div', null,
         el('strong', {style:{fontSize:'.85rem'}}, '核心亮点：'),
         el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}},
-          ...v.key_highlights.map(h => el('span',{className:'tag tag-green'}, h))
+          ...(v.key_highlights || []).map(h => el('span',{className:'tag tag-green'}, h))
         )
       ) : null
     );
@@ -1791,19 +1793,21 @@ function renderChapter3(intro) {
   );
   container.append(card);
 
-  // Usage tips
-  if (intro.usage_tips && intro.usage_tips.length) {
+  // Usage tips (support both new and old field names)
+  const tips = intro.usage_tips || intro.delivery_tips || [];
+  if (tips.length) {
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, '表达技巧'),
-      el('ul', null, ...intro.usage_tips.map(t => el('li', null, t)))
+      el('ul', null, ...tips.map(t => el('li', null, t)))
     ));
   }
 
-  // Mistakes to avoid
-  if (intro.common_mistakes_to_avoid && intro.common_mistakes_to_avoid.length) {
+  // Mistakes to avoid (support both new and old field names)
+  const mistakes = intro.common_mistakes_to_avoid || intro.common_mistakes || [];
+  if (mistakes.length) {
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, el('span',{style:{color:'#e74c3c'}},'✗'), ' 注意事项'),
-      el('ul', null, ...intro.common_mistakes_to_avoid.map(m => el('li', null, m)))
+      el('ul', null, ...mistakes.map(m => el('li', null, m)))
     ));
   }
 }
@@ -1825,7 +1829,7 @@ function renderChapter4(qa) {
     ...Object.entries(cats).map(([k,v]) =>
       el('span',{className:'stat-item'}, (catLabels[k]||k)+': '+v+'题')
     ),
-    el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+qa.total_questions+' 题')
+    el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+(qa.total_questions || qa.questions.length)+' 题')
   );
 
   const questionsList = qa.questions.map((q, idx) => {
@@ -1838,7 +1842,7 @@ function renderChapter4(qa) {
         ' ',
         el('span',{className:'tag tag-gray'}, catLabel),
         ' ',
-        el('span',{style:{color:'#94a3b8',fontSize:'.78rem'}}, '考察维度: '+q.evaluation_dimension),
+        el('span',{style:{color:'#94a3b8',fontSize:'.78rem'}}, '考察维度: '+(q.evaluation_dimension||'综合')),
         q.suggested_time_limit ? el('span',{style:{color:'#94a3b8',fontSize:'.78rem',marginLeft:'8px'}}, '建议时长: '+q.suggested_time_limit) : null
       )
     ];
@@ -1849,17 +1853,17 @@ function renderChapter4(qa) {
 
     bodyParts.push(el('div', {className:'answer-block'},
       el('strong', null, '参考答案要点：'),
-      el('ul', null, ...q.reference_answer_key_points.map(p => el('li', null, p)))
+      el('ul', null, ...(q.reference_answer_key_points || q.answer_points || ['（LLM未返回答案要点）']).map(p => el('li', null, p)))
     ));
 
     if (q.follow_up_chain && q.follow_up_chain.length) {
-      const chainItems = q.follow_up_chain.map((fc, ci) => {
+      const chainItems = (q.follow_up_chain || []).map((fc, ci) => {
         const layerColors = ['#3b82f6','#f59e0b','#ef4444'];
         const layerLabels = ['第一层追问','第二层追问','第三层追问'];
         return el('div', {style:{marginBottom:'8px',paddingLeft:'14px',borderLeft:'3px solid '+(layerColors[ci]||'#94a3b8'),marginLeft:(ci*12)+'px'}},
-          el('div', {style:{fontWeight:600,fontSize:'.82rem',color:layerColors[ci]||'#64748b'}}, (layerLabels[fc.layer-1]||'第'+fc.layer+'层')+'：'+fc.follow_up_question),
-          el('div', {style:{fontSize:'.78rem',color:'#475569',marginTop:'3px'}}, '期望方向：'+fc.expected_direction),
-          el('div', {style:{fontSize:'.78rem',color:'#dc2626',marginTop:'2px'}}, '⚠ 危险信号：'+fc.red_flag)
+          el('div', {style:{fontWeight:600,fontSize:'.82rem',color:layerColors[ci]||'#64748b'}}, (layerLabels[(fc.layer||1)-1]||'第'+(fc.layer||ci+1)+'层')+'：'+(fc.follow_up_question||fc.question||'')),
+          fc.expected_direction ? el('div', {style:{fontSize:'.78rem',color:'#475569',marginTop:'3px'}}, '期望方向：'+fc.expected_direction) : null,
+          fc.red_flag ? el('div', {style:{fontSize:'.78rem',color:'#dc2626',marginTop:'2px'}}, '⚠ 危险信号：'+fc.red_flag) : null
         );
       });
       bodyParts.push(el('div', {className:'followup-block'},
@@ -1874,7 +1878,7 @@ function renderChapter4(qa) {
     }
 
     return el('details', {className:'qa-item'},
-      el('summary', {className:'qa-summary'}, q.question_number+'. '+q.question_text),
+      el('summary', {className:'qa-summary'}, (q.question_number||idx+1)+'. '+(q.question_text||q.question||'')),
       el('div', {className:'qa-body'}, ...bodyParts)
     );
   });

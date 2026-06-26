@@ -1,0 +1,30 @@
+[project]
+name = "interview-prep-agent"
+version = "0.1.0"
+description = "AI 面试准备方案自动生成系统 - 基于JD和简历生成结构化面试准备报告"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+dependencies = [
+    "langgraph>=0.4.0",
+    "langchain-openai>=0.3.0",
+    "pydantic>=2.10.0",
+    "jinja2>=3.1.0",
+    "PyMuPDF>=1.25.0",
+    "python-docx>=1.1.0",
+    "streamlit>=1.40.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.backends._legacy:_Backend"

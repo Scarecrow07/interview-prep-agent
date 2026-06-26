@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ candidate_name }} - 面试准备方案报告</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+  color: #2c3e50; background: #f5f7fa; line-height: 1.7; padding: 20px;
+}
+
+/* ===== Layout ===== */
+.container { max-width: 1000px; margin: 0 auto; }
+
+/* ===== Header ===== */
+.report-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: #fff; border-radius: 12px; padding: 40px; margin-bottom: 28px;
+}
+.report-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+.report-header .meta { font-size: 0.9rem; opacity: 0.85; }
+.report-header .meta span { display: inline-block; margin-right: 24px; }
+
+/* ===== Error Banner ===== */
+.error-banner {
+  background: #fdf0ef; border: 1px solid #e74c3c; border-radius: 8px;
+  padding: 16px 20px; margin-bottom: 24px; color: #c0392b;
+}
+.error-banner h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+.error-banner ul { list-style: none; padding: 0; }
+.error-banner li { padding: 4px 0 4px 20px; position: relative; font-size: 0.9rem; }
+.error-banner li::before { content: ""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #e74c3c; }
+
+/* ===== Skip Notice ===== */
+.skip-notice {
+  background: #f8f9fa; border: 1px dashed #bdc3c7; border-radius: 8px;
+  padding: 20px; text-align: center; color: #7f8c8d; font-size: 0.95rem;
+}
+
+/* ===== Chapter ===== */
+.chapter {
+  background: #fff; border-radius: 12px; padding: 32px; margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(44,62,80,0.06);
+}
+.chapter-title {
+  font-size: 1.35rem; font-weight: 700; color: #2c3e50;
+  padding-bottom: 12px; margin-bottom: 24px;
+  border-bottom: 3px solid #3498db; display: flex; align-items: center; gap: 10px;
+}
+.chapter-title .chapter-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #3498db; color: #fff; font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+}
+
+/* ===== Section ===== */
+.section { margin-bottom: 24px; }
+.section:last-child { margin-bottom: 0; }
+.section-title {
+  font-size: 1.1rem; font-weight: 600; color: #2c3e50;
+  margin-bottom: 14px; padding-left: 12px;
+  border-left: 3px solid #3498db;
+}
+.subsection-title {
+  font-size: 0.95rem; font-weight: 600; color: #34495e;
+  margin-bottom: 10px; margin-top: 16px;
+}
+
+/* ===== Summary Text ===== */
+.summary-text { font-size: 0.95rem; color: #555; line-height: 1.8; margin-bottom: 16px; }
+
+/* ===== Lists ===== */
+.item-list { list-style: none; padding: 0; }
+.item-list li {
+  padding: 8px 0 8px 24px; position: relative; font-size: 0.92rem; color: #444;
+}
+.item-list li::before {
+  content: ""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+  width: 8px; height: 8px; border-radius: 50%; background: #3498db;
+}
+
+/* ===== Tables ===== */
+.table-wrap { overflow-x: auto; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+thead { background: #2c3e50; color: #fff; }
+th { padding: 10px 14px; text-align: left; font-weight: 600; white-space: nowrap; }
+td { padding: 10px 14px; border-bottom: 1px solid #ecf0f1; color: #444; vertical-align: top; }
+tbody tr:hover { background: #f8f9fa; }
+.required-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+}
+.required-badge.yes { background: #e8f8f0; color: #27ae60; }
+.required-badge.no { background: #f0f0f0; color: #7f8c8d; }
+
+/* ===== Status Tags ===== */
+.status-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+}
+.status-tag.match { background: #e8f8f0; color: #27ae60; }
+.status-tag.gap { background: #fef5e7; color: #e67e22; }
+.status-tag.risk { background: #fdedec; color: #e74c3c; }
+
+/* ===== Ring Chart ===== */
+.ring-chart-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+.ring-chart {
+  position: relative; width: 160px; height: 160px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.ring-chart .ring-inner {
+  width: 110px; height: 110px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+}
+.ring-chart .ring-score { font-size: 1.8rem; font-weight: 700; color: #2c3e50; line-height: 1; }
+.ring-chart .ring-label { font-size: 0.75rem; color: #7f8c8d; margin-top: 2px; }
+
+/* ===== Advantage & Risk ===== */
+.advantage-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.advantage-list li {
+  background: #e8f8f0; color: #27ae60; padding: 6px 14px; border-radius: 6px;
+  font-size: 0.88rem; font-weight: 500;
+}
+.risk-list { list-style: none; padding: 0; }
+.risk-list li {
+  padding: 10px 14px; margin-bottom: 8px; border-radius: 6px;
+  font-size: 0.9rem; border-left: 4px solid;
+}
+.risk-list li.risk-high { background: #fdedec; border-left-color: #e74c3c; color: #c0392b; }
+.risk-list li.risk-medium { background: #fef5e7; border-left-color: #e67e22; color: #d35400; }
+.risk-list li.risk-low { background: #fef9e7; border-left-color: #f1c40f; color: #7d6608; }
+.risk-list .risk-level {
+  display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;
+}
+.risk-list li.risk-high .risk-level { background: #e74c3c; color: #fff; }
+.risk-list li.risk-medium .risk-level { background: #e67e22; color: #fff; }
+.risk-list li.risk-low .risk-level { background: #f1c40f; color: #fff; }
+
+/* ===== Intro Tabs (Pure CSS Radio Hack) ===== */
+.intro-tab-container { position: relative; }
+.intro-tab-container input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.intro-tab-labels { display: flex; gap: 2px; margin-bottom: 0; }
+.intro-tab-labels label {
+  display: inline-block; padding: 10px 22px; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; border-radius: 8px 8px 0 0; background: #ecf0f1; color: #7f8c8d;
+  transition: all 0.2s; user-select: none;
+}
+.intro-tab-labels label:hover { background: #dfe6e9; }
+
+#intro-v1:checked ~ .intro-tab-labels label[for="intro-v1"],
+#intro-v2:checked ~ .intro-tab-labels label[for="intro-v2"],
+#intro-v3:checked ~ .intro-tab-labels label[for="intro-v3"] {
+  background: #3498db; color: #fff;
+}
+
+.intro-panels { border: 2px solid #3498db; border-radius: 0 8px 8px 8px; padding: 20px; margin-top: -1px; }
+.intro-panel { display: none; }
+#intro-v1:checked ~ .intro-panels #intro-panel-1,
+#intro-v2:checked ~ .intro-panels #intro-panel-2,
+#intro-v3:checked ~ .intro-panels #intro-panel-3 { display: block; }
+
+.intro-panel .version-name { font-size: 1rem; font-weight: 600; color: #2c3e50; margin-bottom: 12px; }
+.intro-panel .version-content {
+  background: #f8f9fa; border: 1px solid #ecf0f1; border-radius: 8px;
+  padding: 16px; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; margin-bottom: 12px;
+}
+.intro-panel .version-tips { list-style: none; padding: 0; }
+.intro-panel .version-tips li {
+  padding: 6px 0 6px 20px; position: relative; font-size: 0.88rem; color: #555;
+}
+.intro-panel .version-tips li::before {
+  content: ""; position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: #3498db;
+}
+
+/* ===== Details / Summary Collapse ===== */
+details.detail-item {
+  border: 1px solid #ecf0f1; border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+}
+details.detail-item summary {
+  padding: 14px 18px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+  background: #f8f9fa; color: #2c3e50; display: flex; align-items: center;
+  transition: background 0.2s; user-select: none;
+}
+details.detail-item summary:hover { background: #ecf0f1; }
+details.detail-item summary::-webkit-details-marker { color: #3498db; }
+details.detail-item[open] summary { background: #ebf5fb; border-bottom: 1px solid #ecf0f1; }
+.detail-body { padding: 16px 18px; }
+
+/* ===== QA Specific ===== */
+.qa-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.qa-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 0.78rem; font-weight: 600; background: #ebf5fb; color: #2980b9;
+}
+.qa-section-title { font-size: 0.9rem; font-weight: 600; color: #2c3e50; margin: 12px 0 6px; }
+.qa-content-list { list-style: none; padding: 0; }
+.qa-content-list li {
+  padding: 5px 0 5px 18px; position: relative; font-size: 0.88rem; color: #555;
+}
+.qa-content-list li::before {
+  content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 5px; border-radius: 50%; background: #3498db;
+}
+
+/* ===== Coding ===== */
+.coding-problem {
+  border: 1px solid #ecf0f1; border-radius: 8px; margin-bottom: 16px; overflow: hidden;
+}
+.coding-header {
+  padding: 14px 18px; background: #f8f9fa; border-bottom: 1px solid #ecf0f1;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.coding-title { font-size: 1rem; font-weight: 600; color: #2c3e50; }
+.coding-difficulty {
+  display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 600;
+}
+.coding-difficulty.easy { background: #e8f8f0; color: #27ae60; }
+.coding-difficulty.medium { background: #fef5e7; color: #e67e22; }
+.coding-difficulty.hard { background: #fdedec; color: #e74c3c; }
+.coding-body { padding: 18px; }
+.coding-desc { font-size: 0.92rem; color: #444; line-height: 1.8; margin-bottom: 14px; }
+.coding-code {
+  background: #fff; border: 1px solid #ddd; border-radius: 6px;
+  padding: 14px 16px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85rem; line-height: 1.6; overflow-x: auto; white-space: pre; margin-bottom: 14px;
+  color: #333;
+}
+.complexity-wrap {
+  display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.88rem; color: #555;
+}
+.complexity-item { background: #f8f9fa; padding: 6px 14px; border-radius: 6px; }
+.complexity-item strong { color: #2c3e50; }
+
+/* ===== Resources ===== */
+.resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.resource-card {
+  border: 1px solid #ecf0f1; border-radius: 8px; padding: 16px; transition: box-shadow 0.2s;
+}
+.resource-card:hover { box-shadow: 0 2px 8px rgba(44,62,80,0.1); }
+.resource-card .card-title { font-weight: 600; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px; }
+.resource-card .card-type {
+  display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.75rem;
+  background: #ebf5fb; color: #2980b9; margin-bottom: 8px;
+}
+.resource-card .card-desc { font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 8px; }
+.resource-card .card-url {
+  font-size: 0.82rem; word-break: break-all;
+}
+.resource-card .card-url a { color: #3498db; text-decoration: none; }
+.resource-card .card-url a:hover { text-decoration: underline; }
+.resource-card .card-priority {
+  display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600;
+}
+.resource-card .card-priority.high { background: #fdedec; color: #e74c3c; }
+.resource-card .card-priority.medium { background: #fef5e7; color: #e67e22; }
+.resource-card .card-priority.low { background: #ecf0f1; color: #7f8c8d; }
+
+.resource-path-list { list-style: none; padding: 0; counter-reset: step; }
+.resource-path-list li {
+  counter-increment: step; padding: 10px 14px 10px 44px; position: relative;
+  font-size: 0.9rem; color: #444; border-left: 3px solid #3498db; margin-left: 10px;
+}
+.resource-path-list li::before {
+  content: counter(step); position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 50%; background: #3498db; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700;
+}
+.resource-path-list li:last-child { border-left-color: transparent; }
+
+.knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.knowledge-item {
+  background: #f8f9fa; border: 1px solid #ecf0f1; border-radius: 6px;
+  padding: 10px 14px; font-size: 0.88rem; color: #444; text-align: center;
+}
+
+/* ===== Footer ===== */
+.report-footer {
+  text-align: center; padding: 20px; color: #95a5a6; font-size: 0.82rem;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  body { background: #fff; padding: 0; color: #000; }
+  .container { max-width: 100%; }
+  .chapter { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+  .report-header { background: #2c3e50 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ring-chart { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .status-tag, .required-badge, .coding-difficulty, .risk-list li,
+  .advantage-list li, .resource-card .card-priority,
+  .resource-path-list li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  details.detail-item[open] summary { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .intro-tab-labels label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .intro-panels { border-color: #333; }
+  .qa-tag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .coding-code { border: 1px solid #999; }
+  .error-banner { border: 1px solid #e74c3c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  body { padding: 12px; }
+  .report-header { padding: 24px 18px; }
+  .report-header h1 { font-size: 1.3rem; }
+  .report-header .meta span { display: block; margin-right: 0; margin-bottom: 4px; }
+  .chapter { padding: 20px 16px; }
+  .chapter-title { font-size: 1.1rem; }
+  .intro-tab-labels { flex-wrap: wrap; }
+  .intro-tab-labels label { flex: 1; text-align: center; font-size: 0.82rem; padding: 8px 12px; }
+  .intro-panels { padding: 14px; }
+  .resource-grid { grid-template-columns: 1fr; }
+  .knowledge-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .ring-chart { width: 130px; height: 130px; }
+  .ring-chart .ring-inner { width: 90px; height: 90px; }
+  .ring-chart .ring-score { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  {% if errors and errors|length > 0 %}
+  <div class="error-banner">
+    <h3>报告生成提示</h3>
+    <ul>
+      {% for err in errors %}
+      <li>{{ err }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- ===== Header ===== -->
+  <header class="report-header">
+    <h1>{{ candidate_name }} - 面试准备方案报告</h1>
+    <div class="meta">
+      <span>生成时间：{{ generated_at }}</span>
+      {% if jd and jd.position_name %}
+      <span>目标岗位：{{ jd.position_name }}</span>
+      {% endif %}
+      {% if skipped_modules and skipped_modules|length > 0 %}
+      <span>跳过模块：{{ skipped_modules | join(" / ") }}</span>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- 第一章：JD 核心分析 -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">1</span> JD 核心分析</h2>
+
+    {% if jd %}
+    <!-- 岗位基本信息 -->
+    <div class="section">
+      <h3 class="section-title">岗位基本信息</h3>
+      <table>
+        <tbody>
+          {% if jd.position_name %}
+          <tr><td style="width:120px;font-weight:600;">岗位名称</td><td>{{ jd.position_name }}</td></tr>
+          {% endif %}
+          {% if jd.company_industry %}
+          <tr><td style="font-weight:600;">公司 / 行业</td><td>{{ jd.company_industry }}</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 岗位摘要 -->
+    {% if jd.summary %}
+    <div class="section">
+      <h3 class="section-title">JD 摘要</h3>
+      <p class="summary-text">{{ jd.summary }}</p>
+    </div>
+    {% endif %}
+
+    <!-- 核心职责 -->
+    {% if jd.core_responsibilities and jd.core_responsibilities|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">核心职责</h3>
+      <ul class="item-list">
+        {% for item in jd.core_responsibilities %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- 技能要求表格 -->
+    {% if jd.hard_skills and jd.hard_skills|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">技能要求</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>技能 / 技术</th>
+              <th>要求等级</th>
+              <th>是否必需</th>
+              <th>JD 依据</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for skill in jd.hard_skills %}
+            <tr>
+              <td>{{ skill.tech_name }}</td>
+              <td>{{ skill.proficiency_level }}</td>
+              <td>
+                {% if skill.is_required %}
+                <span class="required-badge yes">必需</span>
+                {% else %}
+                <span class="required-badge no">优先</span>
+                {% endif %}
+              </td>
+              <td>{{ skill.reason_from_jd }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 面试评价维度 -->
+    {% if jd.evaluation_dimensions and jd.evaluation_dimensions|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">面试评价维度</h3>
+      <ul class="item-list">
+        {% for dim in jd.evaluation_dimensions %}
+        <li>{{ dim }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="skip-notice">
+      JD 分析模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第二章：简历匹配分析 -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">2</span> 简历匹配分析</h2>
+
+    {% if gap %}
+    <!-- 匹配度环形图 -->
+    {% if gap.overall_match_score is not none %}
+    <div class="section">
+      <h3 class="section-title">整体匹配度</h3>
+      {% set match_deg = gap.overall_match_score * 3.6 %}
+      {% set remain_deg = 360 - match_deg %}
+      <div class="ring-chart-wrap">
+        <div class="ring-chart" style="background: conic-gradient(#27ae60 0deg {{ match_deg }}deg, #ecf0f1 {{ match_deg }}deg 360deg);">
+          <div class="ring-inner">
+            <span class="ring-score">{{ gap.overall_match_score }}%</span>
+            <span class="ring-label">匹配度</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 匹配详情表格 -->
+    {% if gap.matching_details and gap.matching_details|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">匹配详情</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>匹配项</th>
+              <th>岗位要求</th>
+              <th>当前情况</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for detail in gap.matching_details %}
+            <tr>
+              <td>{{ detail.item }}</td>
+              <td>{{ detail.requirement }}</td>
+              <td>{{ detail.current_status }}</td>
+              <td>
+                {% set status = detail.match_status | lower %}
+                {% if status == "match" %}
+                <span class="status-tag match">匹配</span>
+                {% elif status == "gap" %}
+                <span class="status-tag gap">差距</span>
+                {% elif status == "risk" %}
+                <span class="status-tag risk">高风险</span>
+                {% else %}
+                <span class="status-tag gap">{{ detail.match_status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 核心优势 -->
+    {% if gap.core_advantages and gap.core_advantages|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">核心优势</h3>
+      <ul class="advantage-list">
+        {% for adv in gap.core_advantages %}
+        <li>{{ adv }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- 风险预警 -->
+    {% if gap.risk_warnings and gap.risk_warnings|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">风险预警</h3>
+      <ul class="risk-list">
+        {% for warn in gap.risk_warnings %}
+        {% if warn.level is defined %}
+        {% set rl = warn.level | lower %}
+        <li class="risk-{{ rl if rl in ('high','medium','low') else 'medium' }}">
+          <strong>{{ warn.warning }}</strong>
+          <span class="risk-level">{{ warn.level }}</span>
+        </li>
+        {% else %}
+        <li class="risk-medium"><strong>{{ warn.warning }}</strong></li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="skip-notice">
+      简历匹配分析模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第三章：自我介绍方案 -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">3</span> 自我介绍方案</h2>
+
+    {% if intro and intro.versions and intro.versions|length > 0 %}
+    <div class="section intro-tab-container">
+      <h3 class="section-title">版本切换</h3>
+
+      {% for v in intro.versions %}
+      <input type="radio" name="intro-tab" id="intro-v{{ loop.index }}"
+             {% if loop.first %}checked{% endif %}>
+      {% endfor %}
+
+      <div class="intro-tab-labels">
+        {% for v in intro.versions %}
+        <label for="intro-v{{ loop.index }}">{{ v.name }}</label>
+        {% endfor %}
+      </div>
+
+      <div class="intro-panels">
+        {% for v in intro.versions %}
+        <div class="intro-panel" id="intro-panel-{{ loop.index }}">
+          <div class="version-name">{{ v.name }}</div>
+          <div class="version-content">{{ v.content }}</div>
+          {% if v.tips and v.tips|length > 0 %}
+          <h4 class="qa-section-title">版本要点</h4>
+          <ul class="version-tips">
+            {% for tip in v.tips %}
+            <li>{{ tip }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 表达技巧 -->
+    {% if intro and intro.techniques and intro.techniques|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">表达技巧</h3>
+      <ul class="item-list">
+        {% for tech in intro.techniques %}
+        <li>{{ tech }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- 注意事项 -->
+    {% if intro and intro.notes and intro.notes|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">注意事项</h3>
+      <ul class="item-list">
+        {% for note in intro.notes %}
+        <li>{{ note }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if not intro %}
+    <div class="skip-notice">
+      自我介绍方案模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第四章：面试问答题库 -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">4</span> 面试问答题库</h2>
+
+    {% if qa and qa.categories and qa.categories|length > 0 %}
+    {% for cat in qa.categories %}
+    <div class="section">
+      <h3 class="section-title">{{ cat.name }}</h3>
+
+      {% if cat.questions and cat.questions|length > 0 %}
+      {% for q in cat.questions %}
+      <details class="detail-item">
+        <summary>{{ q.question }}</summary>
+        <div class="detail-body">
+          {% if q.answer_key_points and q.answer_key_points|length > 0 %}
+          <div class="qa-section-title">参考答案要点</div>
+          <ul class="qa-content-list">
+            {% for point in q.answer_key_points %}
+            <li>{{ point }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if q.follow_up_directions and q.follow_up_directions|length > 0 %}
+          <div class="qa-section-title">追问方向</div>
+          <ul class="qa-content-list">
+            {% for direction in q.follow_up_directions %}
+            <li>{{ direction }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </details>
+      {% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- 备考建议 -->
+    {% if qa and qa.preparation_tips and qa.preparation_tips|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">备考建议</h3>
+      <ul class="item-list">
+        {% for tip in qa.preparation_tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if not qa %}
+    <div class="skip-notice">
+      面试问答题库模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第五章：笔试编码题（条件包含） -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">5</span> 笔试编码题</h2>
+
+    {% if coding and coding.problems and coding.problems|length > 0 %}
+    {% for prob in coding.problems %}
+    <div class="coding-problem">
+      <div class="coding-header">
+        <span class="coding-title">{{ prob.title }}</span>
+        {% if prob.difficulty %}
+        {% set diff = prob.difficulty | lower %}
+        <span class="coding-difficulty {{ diff }}">
+          {% if diff == "easy" %}简单
+          {% elif diff == "medium" %}中等
+          {% elif diff == "hard" %}困难
+          {% else %}{{ prob.difficulty }}
+          {% endif %}
+        </span>
+        {% endif %}
+      </div>
+      <div class="coding-body">
+        {% if prob.description %}
+        <div class="coding-desc">{{ prob.description }}</div>
+        {% endif %}
+        {% if prob.code_snippet %}
+        <div class="coding-code">{{ prob.code_snippet }}</div>
+        {% endif %}
+        {% if prob.complexity %}
+        <div class="complexity-wrap">
+          {% if prob.complexity.time %}
+          <div class="complexity-item"><strong>时间复杂度：</strong>{{ prob.complexity.time }}</div>
+          {% endif %}
+          {% if prob.complexity.space %}
+          <div class="complexity-item"><strong>空间复杂度：</strong>{{ prob.complexity.space }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+    {% elif coding is not none and coding.problems is defined and coding.problems|length == 0 %}
+    <div class="skip-notice">
+      编码题列表为空，暂无笔试题目。
+    </div>
+
+    {% elif "coding_problems" in skipped_modules %}
+    <div class="skip-notice">
+      该岗位为非技术岗位，已跳过编码题生成。
+    </div>
+
+    {% else %}
+    <div class="skip-notice">
+      笔试编码题模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 第六章：学习资料推荐 -->
+  <!-- ============================================================ -->
+  <section class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">6</span> 学习资料推荐</h2>
+
+    {% if resources %}
+    <!-- 资源卡片 -->
+    {% if resources.resources and resources.resources|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">推荐资源</h3>
+      <div class="resource-grid">
+        {% for res in resources.resources %}
+        <div class="resource-card">
+          <div class="card-title">{{ res.title }}</div>
+          {% if res.type %}
+          <span class="card-type">{{ res.type }}</span>
+          {% endif %}
+          {% if res.priority %}
+          {% set pri = res.priority | lower %}
+          {% if pri in ("high","medium","low") %}
+          <span class="card-priority {{ pri }}">
+            {% if pri == "high" %}高优先级
+            {% elif pri == "medium" %}中优先级
+            {% elif pri == "low" %}低优先级
+            {% endif %}
+          </span>
+          {% else %}
+          <span class="card-priority medium">{{ res.priority }}</span>
+          {% endif %}
+          {% endif %}
+          {% if res.description %}
+          <div class="card-desc">{{ res.description }}</div>
+          {% endif %}
+          {% if res.url %}
+          <div class="card-url"><a href="{{ res.url }}" target="_blank" rel="noopener">{{ res.url }}</a></div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 学习路径 -->
+    {% if resources.learning_path and resources.learning_path|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">学习路径</h3>
+      <ol class="resource-path-list">
+        {% for step in resources.learning_path %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+
+    <!-- 知识点清单 -->
+    {% if resources.knowledge_points and resources.knowledge_points|length > 0 %}
+    <div class="section">
+      <h3 class="section-title">知识点清单</h3>
+      <div class="knowledge-grid">
+        {% for kp in resources.knowledge_points %}
+        <div class="knowledge-item">{{ kp }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="skip-notice">
+      学习资料推荐模块暂未生成，请检查输入。
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="report-footer">
+    <p>本报告由 Interview Prep Agent 自动生成 | {{ generated_at }}</p>
+  </footer>
+
+</div>
+</body>
+</html>

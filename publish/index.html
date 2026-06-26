@@ -521,13 +521,39 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 4. 2分钟版本：约400-500字，适度展开，兼顾技术能力和项目经验
 5. 3分钟版本：约600-750字，完整展示职业发展脉络，含技术成长和职业规划
 6. 避免暴露明显短板，将潜在短板转化为学习意愿
-7. 每个时长生成两版脚本：formal_script（正式版，用词严谨，适合正式面试场景）和 casual_script（口语自然版，用词轻松自然，像和朋友聊天，减少背稿感）
+7. 每个时长必须生成两版脚本：formal_script（正式版，用词严谨，适合正式面试场景）和 casual_script（口语自然版，用词轻松自然，像和朋友聊天，减少背稿感）
 8. formal_script 和 casual_script 必须是完整的自我介绍文本，不得使用省略号或占位符
 
-输出为 JSON，包含：
-- versions: 数组，必须包含3项，每项含 {duration("1分钟"/"2分钟"/"3分钟"), target_scenario(适用场景), formal_script(正式版完整脚本，不得省略), casual_script(口语自然版完整脚本，不得省略), key_highlights(亮点数组)}
-- usage_tips: 表达技巧与注意事项数组
-- common_mistakes_to_avoid: 应避免的常见错误数组`,
+输出为 JSON，结构如下：
+{
+  "versions": [
+    {
+      "duration": "1分钟",
+      "target_scenario": "电话初筛",
+      "formal_script": "（200-250字正式版完整脚本）",
+      "casual_script": "（200-250字口语自然版完整脚本）",
+      "key_highlights": ["亮点1", "亮点2"]
+    },
+    {
+      "duration": "2分钟",
+      "target_scenario": "技术面试",
+      "formal_script": "（400-500字正式版完整脚本）",
+      "casual_script": "（400-500字口语自然版完整脚本）",
+      "key_highlights": ["亮点1", "亮点2"]
+    },
+    {
+      "duration": "3分钟",
+      "target_scenario": "终面/HR面",
+      "formal_script": "（600-750字正式版完整脚本）",
+      "casual_script": "（600-750字口语自然版完整脚本）",
+      "key_highlights": ["亮点1", "亮点2"]
+    }
+  ],
+  "usage_tips": ["技巧1", "技巧2"],
+  "common_mistakes_to_avoid": ["错误1", "错误2"]
+}
+
+注意：versions 数组必须包含3项，每项的 formal_script 和 casual_script 字段都不能为空。`,
 
   qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库。
 
@@ -574,7 +600,7 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 
 输出为 JSON，包含：
 - resources: 数组，每项含 {resource_type, title, target_skill, reason, url_or_reference(或null), estimated_time_required(或null), priority(high/medium/low), difficulty_level(beginner/intermediate/advanced)}
-- study_plan_summary: 3-5天学习路径
+- study_plan_summary: 3-5天学习路径，每个阶段单独一行，用换行符分隔
 - crash_plan_24h: 数组，每项含 {time_slot: 时段(如"第1-2小时"), focus_skill: 聚焦技能, task: 具体任务, key_points: 核心要点数组, expected_outcome: 预期效果}
 - key_knowledge_points: 重点知识要点数组`,
 
@@ -1838,72 +1864,93 @@ function renderChapter3(intro) {
     return;
   }
 
-  // 使用 CSS-only tab 切换方案
-  const tabContainer = el('div', null);
-  const styleTag = document.createElement('style');
-  styleTag.textContent = `
-    .intro-tabs-ctrl input.tab-radio { display: none; }
-    .intro-tabs-ctrl input.tab-radio + .tab-label + .tab-body { display: none; }
-    .intro-tabs-ctrl input.tab-radio:checked + .tab-label + .tab-body { display: block; }
-    .intro-tabs-ctrl .tab-label { display: inline-block; padding: 7px 16px; border-radius: var(--radius-sm, 6px); font-size: .84rem; font-weight: 600; cursor: pointer; background: var(--c-bg, #f0f2f5); color: var(--c-text-muted, #94a3b8); transition: .2s; user-select: none; margin-right: 6px; margin-bottom: 6px; }
-    .intro-tabs-ctrl input.tab-radio:checked + .tab-label { background: #3498db; color: #fff; }
-    .intro-tabs-ctrl .tab-body { display: none; background: var(--c-bg, #f0f2f5); border-radius: 6px; padding: 14px; margin-top: 8px; line-height: 1.7; font-size: .88rem; color: var(--c-text-secondary, #64748b); white-space: pre-wrap; }
-    @media(max-width:480px){ .intro-tabs-ctrl .tab-label{ width: 100%; text-align: center; } }
-  `;
-  tabContainer.append(styleTag);
+  const versions = intro.versions;
 
-  intro.versions.forEach((v, i) => {
-    const id = 'intro-tab-' + (Date.now() + i);
-    const radio = el('input', {type:'radio',name:'introTab',id,className:'tab-radio'});
-    if (i === 0) radio.checked = true;
-    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' - ' + (v.target_scenario || v.scenario || '通用'));
+  // JS-based tab bar
+  const tabBar = el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'14px'}});
+  const panels = [];
 
-    // Support both new format (formal_script/casual_script) and old format (script)
-    const hasDual = v.formal_script || v.casual_script;
+  versions.forEach((v, i) => {
+    const isActive = i === 0;
+    const tabBtn = el('button', {
+      type: 'button',
+      className: 'intro-tab-btn',
+      style: {
+        padding: '8px 18px', borderRadius: '6px', fontSize: '.84rem', fontWeight: '600',
+        cursor: 'pointer', border: 'none', transition: '.2s',
+        background: isActive ? '#3498db' : 'var(--c-bg)',
+        color: isActive ? '#fff' : 'var(--c-text-muted, #94a3b8)'
+      },
+      onclick: function() {
+        tabBar.querySelectorAll('.intro-tab-btn').forEach(function(b) {
+          b.style.background = 'var(--c-bg)';
+          b.style.color = 'var(--c-text-muted, #94a3b8)';
+        });
+        this.style.background = '#3498db';
+        this.style.color = '#fff';
+        panels.forEach(function(p, j) { p.style.display = j === i ? 'block' : 'none'; });
+      }
+    }, v.duration + ' - ' + (v.target_scenario || v.scenario || '通用'));
+    tabBar.append(tabBtn);
+
+    // Panel
+    const panel = el('div', {style:{display: isActive ? 'block' : 'none'}});
     const formalScript = v.formal_script || v.script || '';
     const casualScript = v.casual_script || '';
+    const hasDual = formalScript && casualScript;
 
-    const styleTag2 = document.createElement('style');
-    styleTag2.textContent = `
-      .script-toggle-${i} input.script-radio { display: none; }
-      .script-toggle-${i} input.script-radio + .script-label + .script-body { display: none; }
-      .script-toggle-${i} input.script-radio:checked + .script-label + .script-body { display: block; }
-      .script-toggle-${i} .script-label { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: .76rem; font-weight: 600; cursor: pointer; background: var(--c-surface, #e2e8f0); color: #64748b; margin-right: 4px; }
-      .script-toggle-${i} input#sr-formal-${i}:checked + .script-label[for="sr-formal-${i}"] { background: #3498db; color: #fff; }
-      .script-toggle-${i} input#sr-casual-${i}:checked + .script-label[for="sr-casual-${i}"] { background: #10b981; color: #fff; }
-    `;
+    const scriptBox = el('div', {style:{background:'var(--c-bg, #f0f2f5)',borderRadius:'8px',padding:'14px',marginBottom:'10px',lineHeight:1.8,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}});
+    const scriptToggle = el('div', {style:{marginBottom:'8px'}});
 
-    const toggleParts = [styleTag2];
     if (hasDual) {
-      toggleParts.push(
-        el('input', {type:'radio',name:'scriptStyle'+i,id:'sr-formal-'+i,className:'script-radio',checked:true}),
-        el('label', {htmlFor:'sr-formal-'+i,className:'script-label'}, '正式版'),
-        el('div', {className:'script-body',style:{marginBottom:'10px',lineHeight:2,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}}, formalScript),
-        el('input', {type:'radio',name:'scriptStyle'+i,id:'sr-casual-'+i,className:'script-radio'}),
-        el('label', {htmlFor:'sr-casual-'+i,className:'script-label'}, '口语自然版'),
-        el('div', {className:'script-body',style:{marginBottom:'10px',lineHeight:2,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}}, casualScript)
-      );
+      const formalBody = el('div', {style:{display:'block',lineHeight:2,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}}, formalScript);
+      const casualBody = el('div', {style:{display:'none',lineHeight:2,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}}, casualScript);
+
+      const formalBtn = el('button', {
+        type: 'button',
+        style: {padding:'4px 14px',borderRadius:'4px',fontSize:'.76rem',fontWeight:'600',cursor:'pointer',border:'none',marginRight:'4px',background:'#3498db',color:'#fff',transition:'.2s'}
+      }, '正式版');
+      const casualBtn = el('button', {
+        type: 'button',
+        style: {padding:'4px 14px',borderRadius:'4px',fontSize:'.76rem',fontWeight:'600',cursor:'pointer',border:'none',marginRight:'4px',background:'var(--c-surface, #e2e8f0)',color:'#64748b',transition:'.2s'}
+      }, '口语自然版');
+
+      formalBtn.onclick = function() {
+        formalBody.style.display = 'block';
+        casualBody.style.display = 'none';
+        formalBtn.style.background = '#3498db'; formalBtn.style.color = '#fff';
+        casualBtn.style.background = 'var(--c-surface, #e2e8f0)'; casualBtn.style.color = '#64748b';
+      };
+      casualBtn.onclick = function() {
+        formalBody.style.display = 'none';
+        casualBody.style.display = 'block';
+        casualBtn.style.background = '#10b981'; casualBtn.style.color = '#fff';
+        formalBtn.style.background = 'var(--c-surface, #e2e8f0)'; formalBtn.style.color = '#64748b';
+      };
+
+      scriptToggle.append(formalBtn, casualBtn);
+      scriptBox.innerHTML = '';
+      scriptBox.append(scriptToggle, formalBody, casualBody);
     } else {
-      toggleParts.push(
-        el('div', {style:{marginBottom:'10px',lineHeight:2,whiteSpace:'pre-wrap',fontSize:'.88rem',color:'#475569'}}, formalScript)
-      );
+      scriptBox.append(formalScript);
     }
 
-    const content = el('div', {className:'tab-body'},
-      el('div', {className:'script-toggle-'+i, style:{marginBottom:'10px'}}, ...toggleParts),
-      v.key_highlights?.length ? el('div', null,
+    panel.append(scriptBox);
+
+    // Key highlights
+    if (v.key_highlights && v.key_highlights.length) {
+      panel.append(el('div', null,
         el('strong', {style:{fontSize:'.85rem'}}, '核心亮点：'),
         el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}},
-          ...(v.key_highlights || []).map(h => el('span',{className:'tag tag-green'}, h))
+          ...v.key_highlights.map(h => el('span', {className:'tag tag-green'}, h))
         )
-      ) : null
-    );
-    tabContainer.append(radio, label, content);
+      ));
+    }
+
+    panels.push(panel);
   });
 
-  const card = el('div', {className:'card', style:{overflow:'visible'}},
-    el('div', {className:'intro-tabs-ctrl'}, ...tabContainer.childNodes)
-  );
+  const card = el('div', {className:'card', style:{overflow:'visible'}}, tabBar, ...panels);
   container.append(card);
 
   // Usage tips (support both new and old field names)
@@ -2130,11 +2177,20 @@ function renderChapter6(resources) {
     ));
   }
 
-  // Study plan
+  // Study plan - render as itemized list
   if (resources.study_plan_summary) {
+    const rawLines = resources.study_plan_summary.split(/\n+/).map(l => l.trim()).filter(l => l);
+    let planContent;
+    if (rawLines.length > 1) {
+      planContent = el('ul', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,paddingLeft:'20px',margin:'0'}},
+        ...rawLines.map(l => el('li', {style:{marginBottom:'6px'}}, l))
+      );
+    } else {
+      planContent = el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,whiteSpace:'pre-wrap'}}, resources.study_plan_summary);
+    }
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, '学习路径'),
-      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,whiteSpace:'pre-wrap'}}, resources.study_plan_summary)
+      planContent
     ));
   }
 

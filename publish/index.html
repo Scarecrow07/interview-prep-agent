@@ -631,8 +631,8 @@ async function extractPdfText(file) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     text += content.items.map(item => item.str).join(' ') + '\n';
-    pdf.cleanup();
   }
+  await pdf.destroy();
   return text.trim();
 }
 
@@ -649,7 +649,7 @@ let _pdfjsLoaded = false;
 async function loadPdfJs() {
   if (!_pdfjsLoaded) {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-    // 不需要 worker 就能用 getDocument
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     _pdfjsLoaded = true;
   }
   return window.pdfjsLib;

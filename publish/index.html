@@ -65,6 +65,8 @@ a{color:var(--c-accent);text-decoration:none}
 .provider-badge.kimi{background:#ede9fe;color:#6d28d9}
 .provider-badge.qwen{background:#d1fae5;color:#065f46}
 .provider-badge.doubao{background:#fce7f3;color:#9d174d}
+.portal-link{font-size:.72rem;color:var(--c-accent);text-decoration:underline;white-space:nowrap;margin-left:auto;transition:opacity .15s}
+.portal-link:hover{opacity:.7}
 /* ========== Buttons ========== */
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 28px;border:none;border-radius:var(--radius-sm);font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;gap:8px;width:100%;-webkit-tap-highlight-color:transparent}
 .btn-primary{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
@@ -261,7 +263,7 @@ details[open] .qa-summary::before{content:'−'}
       <select id="modelSelect"></select>
     </div>
     <div class="form-group" style="flex:1.5">
-      <label for="apiKey">API Key <span class="provider-badge openai" id="providerBadge">OpenAI</span></label>
+      <label for="apiKey">API Key <span class="provider-badge openai" id="providerBadge">OpenAI</span> <a id="portalLink" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="portal-link">获取 API Key ↗</a></label>
       <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
     </div>
     <div class="form-group">
@@ -492,12 +494,14 @@ const PROVIDERS = {
     baseUrl: 'https://api.openai.com/v1',
     apiKeyPlaceholder: 'sk-...',
     badgeClass: 'openai',
+    portalUrl: 'https://platform.openai.com/api-keys',
     models: [
-      { id: 'gpt-4o', label: 'GPT-4o (推荐)' },
-      { id: 'gpt-4o-mini', label: 'GPT-4o-mini (更快/便宜)' },
-      { id: 'gpt-4.1', label: 'GPT-4.1' },
+      { id: 'gpt-5.4', label: 'GPT-5.4 (推荐, 生产主力)' },
+      { id: 'gpt-5.4-mini', label: 'GPT-5.4-mini (更快/便宜)' },
+      { id: 'gpt-4.1', label: 'GPT-4.1 (长上下文 1M)' },
       { id: 'gpt-4.1-mini', label: 'GPT-4.1-mini' },
-      { id: 'gpt-4.1-nano', label: 'GPT-4.1-nano' },
+      { id: 'gpt-4.1-nano', label: 'GPT-4.1-nano (最低成本)' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o-mini (兼容)' },
     ],
   },
   deepseek: {
@@ -505,9 +509,12 @@ const PROVIDERS = {
     baseUrl: 'https://api.deepseek.com/v1',
     apiKeyPlaceholder: 'sk-...',
     badgeClass: 'deepseek',
+    portalUrl: 'https://platform.deepseek.com/api_keys',
     models: [
-      { id: 'deepseek-chat', label: 'DeepSeek-V3 (deepseek-chat)' },
-      { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (deepseek-reasoner)' },
+      { id: 'deepseek-v4-flash', label: 'DeepSeek-V4-Flash (推荐)' },
+      { id: 'deepseek-v4-pro', label: 'DeepSeek-V4-Pro (深度思考)' },
+      { id: 'deepseek-chat', label: 'DeepSeek-V3 (deepseek-chat, 旧版)' },
+      { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (deepseek-reasoner, 旧版)' },
     ],
   },
   kimi: {
@@ -515,10 +522,13 @@ const PROVIDERS = {
     baseUrl: 'https://api.moonshot.cn/v1',
     apiKeyPlaceholder: 'sk-...',
     badgeClass: 'kimi',
+    portalUrl: 'https://platform.kimi.com/console/api-keys',
     models: [
-      { id: 'moonshot-v1-8k', label: 'moonshot-v1-8k' },
-      { id: 'moonshot-v1-32k', label: 'moonshot-v1-32k' },
-      { id: 'moonshot-v1-128k', label: 'moonshot-v1-128k (长上下文)' },
+      { id: 'kimi-k2.6', label: 'Kimi K2.6 (推荐, 旗舰)' },
+      { id: 'kimi-k2.5', label: 'Kimi K2.5' },
+      { id: 'kimi-k2.7-code', label: 'Kimi K2.7 Code (编程)' },
+      { id: 'moonshot-v1-32k', label: 'Moonshot V1 32k' },
+      { id: 'moonshot-v1-128k', label: 'Moonshot V1 128k (长上下文)' },
     ],
   },
   qwen: {
@@ -526,10 +536,15 @@ const PROVIDERS = {
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     apiKeyPlaceholder: 'sk-...',
     badgeClass: 'qwen',
+    portalUrl: 'https://bailian.console.aliyun.com/',
     models: [
-      { id: 'qwen-plus', label: 'Qwen-Plus (推荐)' },
-      { id: 'qwen-max', label: 'Qwen-Max' },
-      { id: 'qwen-turbo', label: 'Qwen-Turbo (更快)' },
+      { id: 'qwen-plus', label: 'Qwen-Plus (推荐, 稳定版)' },
+      { id: 'qwen3.7-plus', label: 'Qwen3.7-Plus (最新旗舰)' },
+      { id: 'qwen3.6-flash', label: 'Qwen3.6-Flash (极速)' },
+      { id: 'qwen3.5-plus', label: 'Qwen3.5-Plus' },
+      { id: 'qwen-turbo', label: 'Qwen-Turbo (经济型)' },
+      { id: 'qwen-long', label: 'Qwen-Long (超长上下文 10M)' },
+      { id: 'qwq-plus', label: 'QWQ-Plus (思考模型)' },
     ],
   },
   doubao: {
@@ -537,10 +552,14 @@ const PROVIDERS = {
     baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
     apiKeyPlaceholder: '请输入火山引擎 API Key',
     badgeClass: 'doubao',
+    portalUrl: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
     models: [
-      { id: 'doubao-pro-32k', label: 'Doubao-Pro-32k' },
-      { id: 'doubao-pro-128k', label: 'Doubao-Pro-128k' },
-      { id: 'doubao-lite-32k', label: 'Doubao-Lite-32k (更快)' },
+      { id: 'doubao-seed-2-1-pro-260628', label: 'Doubao Seed 2.1 Pro (推荐)' },
+      { id: 'doubao-seed-2-1-turbo-260628', label: 'Doubao Seed 2.1 Turbo (高速)' },
+      { id: 'doubao-seed-2-0-pro-260215', label: 'Doubao Seed 2.0 Pro' },
+      { id: 'doubao-seed-2-0-lite-260428', label: 'Doubao Seed 2.0 Lite' },
+      { id: 'doubao-seed-2-0-mini-260428', label: 'Doubao Seed 2.0 Mini' },
+      { id: 'doubao-seed-evolving', label: 'Doubao Seed Evolving (快速迭代)' },
     ],
   },
 };
@@ -571,6 +590,8 @@ function onProviderChange() {
   document.getElementById('providerBadge').textContent = cfg.name;
   document.getElementById('providerBadge').className = 'provider-badge ' + cfg.badgeClass;
   document.getElementById('apiKey').placeholder = cfg.apiKeyPlaceholder;
+  // 更新 API 开通入口链接
+  document.getElementById('portalLink').href = cfg.portalUrl;
   // 恢复该 provider 的 API Key
   const savedKey = localStorage.getItem('api_key_' + provider);
   document.getElementById('apiKey').value = savedKey || '';

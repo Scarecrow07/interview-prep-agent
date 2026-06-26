@@ -31,6 +31,25 @@ a:hover{text-decoration:underline}
 .config-row .form-group{flex:1;min-width:180px}
 .config-row .form-group label{font-size:.82rem}
 .config-row .form-group input{font-size:.85rem;padding:8px 10px}
+/* ========== File Upload ========== */
+.file-upload-area{position:relative;border:2px dashed #dce1e6;border-radius:8px;padding:20px;text-align:center;transition:all .2s;cursor:pointer;background:#fafbfc}
+.file-upload-area:hover,.file-upload-area.dragover{border-color:#3498db;background:#eff6ff}
+.file-upload-area.has-file{border-style:solid;border-color:#27ae60;background:#f0fdf4}
+.file-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.file-upload-area .upload-icon{font-size:1.5rem;margin-bottom:6px}
+.file-upload-area .upload-text{font-size:.85rem;color:#94a3b8}
+.file-upload-area .upload-text strong{color:#2c3e50}
+.file-upload-area .upload-hint{font-size:.75rem;color:#b0bec5;margin-top:4px}
+.file-upload-area .file-info{display:none;font-size:.85rem;color:#27ae60;font-weight:600}
+.file-upload-area.has-file .upload-icon,.file-upload-area.has-file .upload-text,.file-upload-area.has-file .upload-hint{display:none}
+.file-upload-area.has-file .file-info{display:block}
+/* ========== Provider Badge ========== */
+.provider-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.provider-badge.openai{background:#dbeafe;color:#1d4ed8}
+.provider-badge.deepseek{background:#fef3c7;color:#92400e}
+.provider-badge.kimi{background:#f3e8ff;color:#7c3aed}
+.provider-badge.qwen{background:#d1fae5;color:#065f46}
+.provider-badge.doubao{background:#fce7f3;color:#9d174d}
 /* ========== Buttons ========== */
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 28px;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s;gap:8px;width:100%}
 .btn-primary{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff}
@@ -172,18 +191,25 @@ details[open] .qa-summary::before{content:'−'}
 
 <!-- ========== INPUT SECTION ========== -->
 <section class="input-section" id="inputSection">
-  <!-- API Key -->
+  <!-- Provider + API Key + Model + Job Type -->
   <div class="config-row">
     <div class="form-group">
-      <label for="apiKey">OpenAI API Key</label>
-      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+      <label for="providerSelect">API 提供商</label>
+      <select id="providerSelect" onchange="onProviderChange()">
+        <option value="openai">OpenAI</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="kimi">Kimi（月之暗面）</option>
+        <option value="qwen">Qwen（阿里云百炼）</option>
+        <option value="doubao">Doubao（火山引擎）</option>
+      </select>
     </div>
     <div class="form-group">
       <label for="modelSelect">模型</label>
-      <select id="modelSelect">
-        <option value="gpt-4o">GPT-4o (推荐)</option>
-        <option value="gpt-4o-mini">GPT-4o-mini (更快)</option>
-      </select>
+      <select id="modelSelect"></select>
+    </div>
+    <div class="form-group" style="flex:1.5">
+      <label for="apiKey">API Key <span class="provider-badge openai" id="providerBadge">OpenAI</span></label>
+      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
     </div>
     <div class="form-group">
       <label for="jobType">岗位类型</label>
@@ -203,8 +229,15 @@ details[open] .qa-summary::before{content:'−'}
     </div>
     <div class="form-group">
       <label for="resumeText">简历 <span style="color:#e74c3c">*</span></label>
-      <textarea id="resumeText" placeholder="粘贴简历文本内容"></textarea>
+      <textarea id="resumeText" placeholder="粘贴简历文本内容，或直接上传文件"></textarea>
       <div class="char-count"><span id="resumeCount">0</span> 字符</div>
+      <div class="file-upload-area" id="fileUploadArea">
+        <input type="file" id="resumeFile" accept=".txt,.pdf,.docx" onchange="handleFileUpload(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">点击或拖拽上传简历文件<br>支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong></div>
+        <div class="upload-hint">上传后会自动提取文本填充到上方</div>
+        <div class="file-info" id="fileInfo"><span id="fileName"></span> 已上传</div>
+      </div>
     </div>
   </div>
 
@@ -389,8 +422,97 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 - key_knowledge_points: 重点知识要点数组`
 };
 
+// ========== PROVIDER CONFIG ==========
+const PROVIDERS = {
+  openai: {
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    apiKeyPlaceholder: 'sk-...',
+    badgeClass: 'openai',
+    models: [
+      { id: 'gpt-4o', label: 'GPT-4o (推荐)' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o-mini (更快/便宜)' },
+      { id: 'gpt-4.1', label: 'GPT-4.1' },
+      { id: 'gpt-4.1-mini', label: 'GPT-4.1-mini' },
+      { id: 'gpt-4.1-nano', label: 'GPT-4.1-nano' },
+    ],
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    baseUrl: 'https://api.deepseek.com/v1',
+    apiKeyPlaceholder: 'sk-...',
+    badgeClass: 'deepseek',
+    models: [
+      { id: 'deepseek-chat', label: 'DeepSeek-V3 (deepseek-chat)' },
+      { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (deepseek-reasoner)' },
+    ],
+  },
+  kimi: {
+    name: 'Kimi',
+    baseUrl: 'https://api.moonshot.cn/v1',
+    apiKeyPlaceholder: 'sk-...',
+    badgeClass: 'kimi',
+    models: [
+      { id: 'moonshot-v1-8k', label: 'moonshot-v1-8k' },
+      { id: 'moonshot-v1-32k', label: 'moonshot-v1-32k' },
+      { id: 'moonshot-v1-128k', label: 'moonshot-v1-128k (长上下文)' },
+    ],
+  },
+  qwen: {
+    name: 'Qwen',
+    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    apiKeyPlaceholder: 'sk-...',
+    badgeClass: 'qwen',
+    models: [
+      { id: 'qwen-plus', label: 'Qwen-Plus (推荐)' },
+      { id: 'qwen-max', label: 'Qwen-Max' },
+      { id: 'qwen-turbo', label: 'Qwen-Turbo (更快)' },
+    ],
+  },
+  doubao: {
+    name: 'Doubao',
+    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+    apiKeyPlaceholder: '请输入火山引擎 API Key',
+    badgeClass: 'doubao',
+    models: [
+      { id: 'doubao-pro-32k', label: 'Doubao-Pro-32k' },
+      { id: 'doubao-pro-128k', label: 'Doubao-Pro-128k' },
+      { id: 'doubao-lite-32k', label: 'Doubao-Lite-32k (更快)' },
+    ],
+  },
+};
+
 // ========== STATE ==========
 let isGenerating = false;
+
+// ========== INIT ==========
+function initProvider() {
+  // 初始化模型下拉列表
+  const provider = document.getElementById('providerSelect').value;
+  updateModelOptions(provider);
+  // 恢复 localStorage 中的 API Key（按 provider 分别存）
+  const savedKey = localStorage.getItem('api_key_' + provider);
+  if (savedKey) document.getElementById('apiKey').value = savedKey;
+}
+function updateModelOptions(provider) {
+  const cfg = PROVIDERS[provider];
+  const sel = document.getElementById('modelSelect');
+  sel.innerHTML = cfg.models.map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+}
+function onProviderChange() {
+  const provider = document.getElementById('providerSelect').value;
+  const cfg = PROVIDERS[provider];
+  // 更新模型列表
+  updateModelOptions(provider);
+  // 更新 Badge 和 placeholder
+  document.getElementById('providerBadge').textContent = cfg.name;
+  document.getElementById('providerBadge').className = 'provider-badge ' + cfg.badgeClass;
+  document.getElementById('apiKey').placeholder = cfg.apiKeyPlaceholder;
+  // 恢复该 provider 的 API Key
+  const savedKey = localStorage.getItem('api_key_' + provider);
+  document.getElementById('apiKey').value = savedKey || '';
+}
+initProvider();
 
 // ========== CHARACTER COUNT ==========
 document.getElementById('jdText').addEventListener('input', function(){
@@ -401,19 +523,23 @@ document.getElementById('resumeText').addEventListener('input', function(){
 });
 
 // ========== LOCAL STORAGE ==========
-const savedKey = localStorage.getItem('openai_api_key');
+const savedKey = localStorage.getItem('api_key_openai');
 if (savedKey) document.getElementById('apiKey').value = savedKey;
 document.getElementById('apiKey').addEventListener('change', function(){
-  localStorage.setItem('openai_api_key', this.value);
+  const provider = document.getElementById('providerSelect').value;
+  localStorage.setItem('api_key_' + provider, this.value);
 });
 
-// ========== OPENAI CALL ==========
+// ========== OPENAI-COMPATIBLE API CALL ==========
 async function callOpenAI(systemPrompt, userMessage) {
+  const provider = document.getElementById('providerSelect').value;
+  const cfg = PROVIDERS[provider];
   const apiKey = document.getElementById('apiKey').value.trim();
   const model = document.getElementById('modelSelect').value;
-  if (!apiKey) throw new Error('请先输入 OpenAI API Key');
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+  if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
+
+  const resp = await fetch(cfg.baseUrl + '/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -432,12 +558,12 @@ async function callOpenAI(systemPrompt, userMessage) {
 
   if (!resp.ok) {
     const err = await resp.json().catch(()=>({}));
-    throw new Error(err.error?.message || `API 请求失败 (${resp.status})`);
+    throw new Error(`${cfg.name} 请求失败: ${err.error?.message || resp.status}`);
   }
 
   const data = await resp.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('API 响应为空');
+  if (!content) throw new Error(`${cfg.name} 响应为空`);
   return JSON.parse(content);
 }
 
@@ -468,6 +594,97 @@ function hideError() {
   document.getElementById('errorBanner').classList.remove('visible');
 }
 
+// ========== FILE UPLOAD ==========
+async function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const area = document.getElementById('fileUploadArea');
+  document.getElementById('fileName').textContent = file.name;
+  area.classList.add('has-file');
+
+  try {
+    if (file.name.endsWith('.txt')) {
+      const text = await file.text();
+      document.getElementById('resumeText').value = text;
+    } else if (file.name.endsWith('.pdf')) {
+      const text = await extractPdfText(file);
+      document.getElementById('resumeText').value = text;
+    } else if (file.name.endsWith('.docx')) {
+      const text = await extractDocxText(file);
+      document.getElementById('resumeText').value = text;
+    }
+    document.getElementById('resumeCount').textContent = document.getElementById('resumeText').value.length;
+  } catch (e) {
+    showError('文件解析失败: ' + e.message);
+    area.classList.remove('has-file');
+  }
+}
+
+async function extractPdfText(file) {
+  // 用 pdf.js 解析 PDF，通过 CDN 加载
+  const pdfjsLib = await loadPdfJs();
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+    pdf.cleanup();
+  }
+  return text.trim();
+}
+
+async function extractDocxText(file) {
+  // 用 mammoth.js 解析 .docx
+  await loadMammoth();
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+  return result.value.trim();
+}
+
+// 按需加载 CDN 库
+let _pdfjsLoaded = false;
+async function loadPdfJs() {
+  if (!_pdfjsLoaded) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    // 不需要 worker 就能用 getDocument
+    _pdfjsLoaded = true;
+  }
+  return window.pdfjsLib;
+}
+let _mammothLoaded = false;
+async function loadMammoth() {
+  if (!_mammothLoaded) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+    _mammothLoaded = true;
+  }
+}
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('加载脚本失败: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+// 拖拽上传
+const uploadArea = document.getElementById('fileUploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    document.getElementById('resumeFile').files = e.dataTransfer.files;
+    handleFileUpload({ target: { files: e.dataTransfer.files } });
+  }
+});
+
 // ========== MAIN GENERATION ==========
 async function startGenerate() {
   if (isGenerating) return;
@@ -486,7 +703,11 @@ async function startGenerate() {
   // Validation
   if (jdText.length < 50) { showError('JD 文本至少需要 50 个字符'); resetBtn(); return; }
   if (resumeText.length < 50) { showError('简历文本至少需要 50 个字符'); resetBtn(); return; }
-  if (!document.getElementById('apiKey').value.trim()) { showError('请先输入 OpenAI API Key'); resetBtn(); return; }
+  if (!document.getElementById('apiKey').value.trim()) {
+    const provider = document.getElementById('providerSelect').value;
+    showError(`请先输入 ${PROVIDERS[provider].name} API Key`);
+    resetBtn(); return;
+  }
 
   // Show progress
   document.getElementById('progressArea').classList.add('visible');

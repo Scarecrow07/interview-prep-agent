@@ -41,9 +41,13 @@ a{color:var(--c-accent);text-decoration:none}
 .form-group textarea{min-height:150px;resize:vertical;line-height:1.5}
 .form-group .char-count{text-align:right;font-size:.75rem;color:var(--c-text-muted);margin-top:3px}
 /* ========== Config Row ========== */
-.config-row{background:var(--c-bg);border-radius:var(--radius);padding:14px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1.6fr 1fr;gap:10px;align-items:end}
-.config-row .form-group label{font-size:.78rem;color:var(--c-text-secondary)}
+.config-row{background:var(--c-bg);border-radius:var(--radius);padding:14px;margin-bottom:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}
+.config-row .form-group label{font-size:.78rem;color:var(--c-text-secondary);white-space:nowrap}
 .config-row .form-group input,.config-row .form-group select{font-size:.84rem;padding:8px 10px;background:var(--c-surface)}
+.api-key-label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.api-key-meta{display:flex;align-items:center;gap:6px;margin-top:4px}
+.api-key-meta .portal-link{font-size:.72rem;color:var(--c-accent);text-decoration:none;white-space:nowrap}
+.api-key-meta .portal-link:hover{text-decoration:underline}
 /* ========== File Upload ========== */
 .file-upload-area{position:relative;border:2px dashed var(--c-border);border-radius:var(--radius-sm);padding:16px;text-align:center;transition:all .2s;cursor:pointer;background:var(--c-bg);margin-top:8px}
 .file-upload-area:hover,.file-upload-area.dragover{border-color:var(--c-accent);background:var(--c-accent-light)}
@@ -262,9 +266,10 @@ details[open] .qa-summary::before{content:'−'}
       <label for="modelSelect">模型</label>
       <select id="modelSelect"></select>
     </div>
-    <div class="form-group" style="flex:1.5">
-      <label for="apiKey">API Key <span class="provider-badge deepseek" id="providerBadge">DeepSeek</span> <a id="portalLink" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" class="portal-link">获取 API Key ↗</a></label>
+    <div class="form-group">
+      <label for="apiKey"><span class="api-key-label">API Key <span class="provider-badge deepseek" id="providerBadge">DeepSeek</span></span></label>
       <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+      <div class="api-key-meta"><a id="portalLink" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" class="portal-link">获取 API Key ↗</a></div>
     </div>
     <div class="form-group">
       <label for="jobType">岗位类型</label>

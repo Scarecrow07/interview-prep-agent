@@ -593,6 +593,47 @@ document.getElementById('apiKey').addEventListener('change', function(){
   localStorage.setItem('api_key_' + provider, this.value);
 });
 
+// ========== SAFE JSON PARSER ==========
+function safeParseJSON(text) {
+  if (!text) throw new Error('响应内容为空');
+  let cleaned = text.trim();
+
+  // 1. 尝试直接解析
+  try {
+    return JSON.parse(cleaned);
+  } catch (_) {}
+
+  // 2. 提取 markdown 代码块 ```json ... ```
+  const blockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (blockMatch) {
+    try {
+      return JSON.parse(blockMatch[1].trim());
+    } catch (_) {}
+  }
+
+  // 3. 提取第一个 { ... } 结构（从最外层花括号）
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    const candidate = cleaned.slice(start, end + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch (_) {}
+  }
+
+  // 4. 尝试修复常见问题：移除尾部逗号、修复未转义引号
+  try {
+    const fixed = cleaned
+      .replace(/,\s*}/g, '}')           // 移除 object 尾部逗号
+      .replace(/,\s*\]/g, ']')          // 移除 array 尾部逗号
+      .replace(/([{,])\s*'([^']*?)'\s*:/g, '$1"$2":') // 单引号 key 转双引号
+      .replace(/:\s*'([^']*?)'(\s*[,}\]])/g, ':"$1"$2'); // 单引号 value 转双引号
+    return JSON.parse(fixed);
+  } catch (_) {}
+
+  throw new Error('JSON 解析失败，LLM 返回格式异常');
+}
+
 // ========== OPENAI-COMPATIBLE API CALL ==========
 async function callOpenAI(systemPrompt, userMessage) {
   const provider = document.getElementById('providerSelect').value;
@@ -602,21 +643,34 @@ async function callOpenAI(systemPrompt, userMessage) {
 
   if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
 
+  // 判断当前模型是否支持 response_format: json_object
+  const supportsJsonMode =
+    provider === 'openai' ||
+    (provider === 'deepseek' && model !== 'deepseek-reasoner');
+
+  const body = {
+    model: model,
+    temperature: 0.3,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage }
+    ]
+  };
+  // 仅支持的模型添加 json_object 约束
+  if (supportsJsonMode) {
+    body.response_format = { type: 'json_object' };
+  } else {
+    // 不支持的模型，在 system prompt 中强调 JSON 格式
+    body.messages[0].content = systemPrompt + '\n\n你必须只返回一个合法 JSON 对象，不要使用 markdown 代码块包裹。';
+  }
+
   const resp = await fetch(cfg.baseUrl + '/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify({
-      model: model,
-      temperature: 0.3,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage }
-      ]
-    })
+    body: JSON.stringify(body)
   });
 
   if (!resp.ok) {
@@ -627,7 +681,7 @@ async function callOpenAI(systemPrompt, userMessage) {
   const data = await resp.json();
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error(`${cfg.name} 响应为空`);
-  return JSON.parse(content);
+  return safeParseJSON(content);
 }
 
 // ========== STEP HELPERS ==========

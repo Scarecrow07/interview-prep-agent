@@ -51,17 +51,30 @@ a{color:var(--c-accent);text-decoration:none}
 .portal-link{font-size:.72rem;color:var(--c-accent);text-decoration:none;white-space:nowrap}
 .portal-link:hover{text-decoration:underline}
 /* ========== File Upload ========== */
-.file-upload-area{position:relative;border:2px dashed var(--c-border);border-radius:var(--radius-sm);padding:16px;text-align:center;transition:all .2s;cursor:pointer;background:var(--c-bg);margin-top:8px}
+.file-upload-area{position:relative;border:2px dashed var(--c-border);border-radius:var(--radius-sm);height:100px;padding:8px 12px;text-align:center;transition:all .2s;cursor:pointer;background:var(--c-bg);margin-top:8px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px}
 .file-upload-area:hover,.file-upload-area.dragover{border-color:var(--c-accent);background:var(--c-accent-light)}
 .file-upload-area.has-file{border-style:solid;border-color:var(--c-success);background:#f0fdf4}
 .file-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-.file-upload-area .upload-icon{font-size:1.4rem;margin-bottom:4px}
-.file-upload-area .upload-text{font-size:.82rem;color:var(--c-text-muted)}
+.file-upload-area .upload-icon{font-size:1.8rem;flex-shrink:0;line-height:1}
+.file-upload-area .upload-content{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.file-upload-area .upload-text{font-size:.8rem;color:var(--c-text-muted);text-align:left;line-height:1.4}
 .file-upload-area .upload-text strong{color:var(--c-text)}
-.file-upload-area .upload-hint{font-size:.72rem;color:#b0bec5;margin-top:3px}
+.file-upload-area .upload-hint{font-size:.7rem;color:#b0bec5;text-align:left}
 .file-upload-area .file-info{display:none;font-size:.82rem;color:var(--c-success);font-weight:600}
-.file-upload-area.has-file .upload-icon,.file-upload-area.has-file .upload-text,.file-upload-area.has-file .upload-hint{display:none}
+.file-upload-area.has-file .upload-icon,.file-upload-area.has-file .upload-content{display:none}
 .file-upload-area.has-file .file-info{display:block}
+/* ========== Context Details ========== */
+.context-details{border:1px solid var(--c-border);border-radius:var(--radius-sm);overflow:hidden;background:var(--c-surface)}
+.context-summary{padding:8px 12px;font-size:.82rem;font-weight:600;color:var(--c-text);cursor:pointer;user-select:none;transition:background .15s}
+.context-summary:hover{background:var(--c-bg)}
+.context-body{padding:10px 12px}
+.context-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.context-field{display:flex;flex-direction:column;gap:3px}
+.context-field label{font-size:.72rem;font-weight:600;color:var(--c-text-muted)}
+.context-field input,.context-field select,.context-field textarea{padding:6px 8px;border:1px solid var(--c-border);border-radius:4px;font-size:.8rem;font-family:inherit;background:var(--c-surface)}
+.context-field textarea{resize:vertical;border-radius:4px}
+@media(max-width:768px){.context-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.context-grid{grid-template-columns:1fr}}
 /* ========== Image Preview ========== */
 .img-preview{max-width:100%;max-height:160px;border-radius:4px;margin-top:6px;display:none;object-fit:contain;background:var(--c-bg)}
 /* ========== Provider Badge ========== */
@@ -303,8 +316,10 @@ details[open] .qa-summary::before{content:'−'}
       <div class="file-upload-area" id="jdFileUploadArea">
         <input type="file" id="jdFile" accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp" onchange="handleJdFileUpload(event)">
         <div class="upload-icon">📄</div>
-        <div class="upload-text">点击或拖拽上传<br>支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong> <strong>图片</strong></div>
-        <div class="upload-hint">图片会自动 OCR 提取文字</div>
+        <div class="upload-content">
+          <div class="upload-text">点击或拖拽上传 · 支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong> <strong>图片</strong></div>
+          <div class="upload-hint">图片会自动 OCR 提取文字</div>
+        </div>
         <div class="file-info" id="jdFileInfo"><span id="jdFileName"></span> 已上传</div>
       </div>
       <img class="img-preview" id="jdImgPreview">
@@ -316,8 +331,10 @@ details[open] .qa-summary::before{content:'−'}
       <div class="file-upload-area" id="fileUploadArea">
         <input type="file" id="resumeFile" accept=".txt,.pdf,.docx" onchange="handleFileUpload(event)">
         <div class="upload-icon">📄</div>
-        <div class="upload-text">点击或拖拽上传简历文件<br>支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong></div>
-        <div class="upload-hint">上传后会自动提取文本填充到上方</div>
+        <div class="upload-content">
+          <div class="upload-text">点击或拖拽上传简历 · 支持 <strong>.txt</strong> <strong>.pdf</strong> <strong>.docx</strong></div>
+          <div class="upload-hint">上传后会自动提取文本填充到上方</div>
+        </div>
         <div class="file-info" id="fileInfo"><span id="fileName"></span> 已上传</div>
       </div>
     </div>
@@ -327,6 +344,46 @@ details[open] .qa-summary::before{content:'−'}
     <label for="candidateName">候选人姓名（可选）</label>
     <input type="text" id="candidateName" placeholder="如：张三">
   </div>
+
+  <details class="context-details" style="margin-bottom:12px">
+    <summary class="context-summary">📋 面试背景信息（可选，填写后方案更精准）</summary>
+    <div class="context-body">
+      <div class="context-grid">
+        <div class="context-field">
+          <label for="companyName">公司名称</label>
+          <input type="text" id="companyName" placeholder="如：字节跳动、腾讯">
+        </div>
+        <div class="context-field">
+          <label for="interviewRound">面试轮次</label>
+          <select id="interviewRound">
+            <option value="">请选择</option>
+            <option value="一面">一面（技术初筛）</option>
+            <option value="二面">二面（技术深入）</option>
+            <option value="三面">三面（交叉面/架构面）</option>
+            <option value="四面及以上">四面及以上</option>
+            <option value="HR面">HR面</option>
+            <option value="终面">终面</option>
+          </select>
+        </div>
+        <div class="context-field">
+          <label for="interviewFormat">面试形式</label>
+          <select id="interviewFormat">
+            <option value="">请选择</option>
+            <option value="电话面试">电话面试</option>
+            <option value="视频面试">视频面试</option>
+            <option value="现场面试">现场面试</option>
+            <option value="白板编程">白板编程</option>
+            <option value="混合形式">混合形式</option>
+          </select>
+        </div>
+      </div>
+      <div class="context-field" style="margin-top:8px">
+        <label for="hrNotes">HR沟通情况 / 其他补充</label>
+        <textarea id="hrNotes" placeholder="如：HR提到团队偏重数据工程能力，希望候选人有大厂经验；薪资范围 30-40K；岗位是急招；之前面试反馈沟通能力需加强..." style="min-height:60px"></textarea>
+      </div>
+      <p style="font-size:.72rem;color:#94a3b8;margin-top:6px">💡 以上信息将传递给 LLM，帮助生成更贴合实际面试场景的方案。不会保存或上传到任何服务器。</p>
+    </div>
+  </details>
 
   <button class="btn btn-primary" id="generateBtn" type="button" onclick="startGenerate()">
     🚀 生成面试准备方案
@@ -1006,6 +1063,14 @@ async function startGenerate() {
   const candidateName = document.getElementById('candidateName').value.trim() || '候选人';
   const jobType = document.getElementById('jobType').value;
 
+  // Capture interview context
+  const interviewContext = {
+    companyName: document.getElementById('companyName')?.value.trim() || '',
+    interviewRound: document.getElementById('interviewRound')?.value || '',
+    interviewFormat: document.getElementById('interviewFormat')?.value || '',
+    hrNotes: document.getElementById('hrNotes')?.value.trim() || ''
+  };
+
   // Validation
   if (jdText.length < 50) { showError('JD 文本至少需要 50 个字符'); resetBtn(); return; }
   if (resumeText.length < 50) { showError('简历文本至少需要 50 个字符'); resetBtn(); return; }
@@ -1035,8 +1100,10 @@ async function startGenerate() {
     // Step 1: JD Analysis
     setStep('step-jd', 'running');
     setProgress(15, '正在分析 JD...');
+    const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.hrNotes)
+      ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.hrNotes?('HR沟通情况：'+interviewContext.hrNotes):''].filter(Boolean).join('\n')}` : '';
     const jdResult = await callOpenAIWithRetry(PROMPTS.jd_analyzer,
-      `请分析以下职位描述（JD）：\n\n${jdText}`
+      `请分析以下职位描述（JD）：\n\n${jdText}${phase1Context}`
     );
     results.jd = jdResult;
     setStep('step-jd', 'done');
@@ -1046,7 +1113,7 @@ async function startGenerate() {
     setStep('step-gap', 'running');
     const jdSummary = `【JD分析摘要】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n级别: ${jdResult.role_level}`;
     const gapResult = await callOpenAIWithRetry(PROMPTS.gap_analyzer,
-      jdSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + '\n\n请进行详细的匹配分析。'
+      jdSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + phase1Context + '\n\n请进行详细的匹配分析。'
     );
     results.gap = gapResult;
     setStep('step-gap', 'done');
@@ -1058,11 +1125,11 @@ async function startGenerate() {
     document.getElementById('reportArea').classList.add('visible');
 
     // Show confirmation banner with supplement input
-    showConfirmation(results, candidateName, jobType, jdText, resumeText);
+    showConfirmation(results, candidateName, jobType, jdText, resumeText, interviewContext);
 
     // Store context for phase 2
     window._pendingResults = results;
-    window._pendingContext = { candidateName, jobType, jdText, resumeText, jdResult: results.jd, gapResult: results.gap };
+    window._pendingContext = { candidateName, jobType, jdText, resumeText, jdResult: results.jd, gapResult: results.gap, interviewContext };
 
     // Don't proceed to phase 2 yet — wait for user confirmation
     isGenerating = false;
@@ -1096,11 +1163,20 @@ async function continueGenerate() {
   const results = window._pendingResults;
   if (!ctx || !results) { showError('会话已过期，请重新生成'); resetBtn(); return; }
 
-  const { candidateName, jobType, jdText, resumeText, jdResult, gapResult } = ctx;
+  const { candidateName, jobType, jdText, resumeText, jdResult, gapResult, interviewContext } = ctx;
 
   // Capture user supplement notes
   const supplementInput = document.getElementById('supplementNotes');
   const userNotes = supplementInput ? supplementInput.value.trim() : '';
+
+  // Build interview context string for LLM prompts
+  const ivCtx = interviewContext || {};
+  const ctxParts = [];
+  if (ivCtx.companyName) ctxParts.push('面试公司：' + ivCtx.companyName);
+  if (ivCtx.interviewRound) ctxParts.push('面试轮次：' + ivCtx.interviewRound);
+  if (ivCtx.interviewFormat) ctxParts.push('面试形式：' + ivCtx.interviewFormat);
+  if (ivCtx.hrNotes) ctxParts.push('HR沟通情况：' + ivCtx.hrNotes);
+  const contextExtra = ctxParts.length ? '\n\n【面试背景信息】\n' + ctxParts.join('\n') : '';
 
   try {
     // Hide confirmation banner
@@ -1110,7 +1186,7 @@ async function continueGenerate() {
     // Step 3: Self Intro
     setStep('step-intro', 'running');
     setProgress(40, '生成自我介绍...');
-    const introPromptExtra = userNotes ? '\n\n【候选人补充说明】\n' + userNotes : '';
+    const introPromptExtra = (userNotes ? '\n\n【候选人补充说明】\n' + userNotes : '') + contextExtra;
     const introResult = await callOpenAIWithRetry(PROMPTS.self_intro,
       `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'?'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'?'}\n项目: ${((gapResult.resume_summary||{}).notable_projects||[]).join('; ')}\n\n请生成适合该候选人的自我介绍方案，每个时长需要正式版和口语自然版两版脚本。${introPromptExtra}`
     );
@@ -1167,7 +1243,7 @@ async function continueGenerate() {
     // Step 7: Consistency verification
     setStep('step-verify', 'running');
     const verifyResult = await callOpenAIWithRetry(PROMPTS.verify_agent,
-      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n\n请校验以上面试准备方案的准确性和一致性。`
+      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n${contextExtra}\n\n请校验以上面试准备方案的准确性和一致性。`
     );
     results.verify = verifyResult;
     setStep('step-verify', 'done');
@@ -1217,7 +1293,14 @@ async function callOpenAIWithRetry(systemPrompt, userMessage, maxRetries = 2) {
 }
 
 // ========== Show confirmation banner after phase 1 ==========
-function showConfirmation(results, candidateName, jobType, jdText, resumeText) {
+function showConfirmation(results, candidateName, jobType, jdText, resumeText, interviewContext) {
+  const ctx = interviewContext || {};
+  const ctxLines = [];
+  if (ctx.companyName) ctxLines.push('公司：' + ctx.companyName);
+  if (ctx.interviewRound) ctxLines.push('轮次：' + ctx.interviewRound);
+  if (ctx.interviewFormat) ctxLines.push('形式：' + ctx.interviewFormat);
+  if (ctx.hrNotes) ctxLines.push('HR沟通：' + ctx.hrNotes);
+
   let banner = document.getElementById('confirmBanner');
   if (!banner) {
     banner = el('div', {id:'confirmBanner', className:'confirm-banner'});
@@ -1236,7 +1319,20 @@ function showConfirmation(results, candidateName, jobType, jdText, resumeText) {
         el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginTop:'2px'}},
           '如需修正，可直接修改 JD/简历文本后重新生成；确认无误后点击继续。')
       )
-    ),
+    )
+  );
+
+  // Show interview context summary if any
+  if (ctxLines.length) {
+    banner.append(
+      el('div', {style:{marginBottom:'12px',padding:'8px 10px',background:'#f0f9ff',border:'1px solid #bae6fd',borderRadius:'6px',fontSize:'.78rem',color:'#0369a1'}},
+        el('strong', null, '📋 已识别的面试背景：'),
+        el('div', {style:{marginTop:'4px',lineHeight:1.6}}, ctxLines.join(' · '))
+      )
+    );
+  }
+
+  banner.append(
     el('div', {style:{marginBottom:'12px'}},
       el('label', {htmlFor:'supplementNotes', style:{fontSize:'.82rem',fontWeight:600,color:'#374151',display:'block',marginBottom:'6px'}}, '补充说明（可选）'),
       el('textarea', {

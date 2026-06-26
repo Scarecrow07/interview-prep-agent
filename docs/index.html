@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 面试准备方案生成器</title>
+<style>
+/* ========== Reset & Base ========== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:#2c3e50;background:#f5f7fa;line-height:1.7;min-height:100vh}
+a{color:#3498db;text-decoration:none}
+a:hover{text-decoration:underline}
+/* ========== Layout ========== */
+.container{max-width:1000px;margin:0 auto;padding:20px}
+/* ========== Header ========== */
+.header{background:linear-gradient(135deg,#2c3e50,#3498db);color:#fff;padding:40px 0;text-align:center}
+.header h1{font-size:1.8rem;font-weight:700;margin-bottom:8px}
+.header p{font-size:1rem;opacity:.85}
+.header .badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:12px;font-size:.8rem;margin-top:8px}
+/* ========== Input Section ========== */
+.input-section{background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-top:-20px;position:relative;z-index:2}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column}
+.form-group label{font-weight:600;font-size:.9rem;margin-bottom:6px;color:#2c3e50}
+.form-group textarea,.form-group input,.form-group select{padding:10px 12px;border:1px solid #dce1e6;border-radius:8px;font-size:.9rem;font-family:inherit;transition:border-color .2s;background:#fafbfc}
+.form-group textarea:focus,.form-group input:focus,.form-group select:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px rgba(52,152,219,.15)}
+.form-group textarea{min-height:160px;resize:vertical}
+.form-group .char-count{text-align:right;font-size:.8rem;color:#94a3b8;margin-top:4px}
+.config-row{background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.config-row .form-group{flex:1;min-width:180px}
+.config-row .form-group label{font-size:.82rem}
+.config-row .form-group input{font-size:.85rem;padding:8px 10px}
+/* ========== Buttons ========== */
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 28px;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s;gap:8px;width:100%}
+.btn-primary{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 15px rgba(52,152,219,.35)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:#eef2f7;color:#2c3e50}
+.btn-secondary:hover{background:#e2e8f0}
+/* ========== Progress ========== */
+.progress-area{display:none;margin-top:20px}
+.progress-area.visible{display:block}
+.progress-bar-track{width:100%;height:8px;background:#eef2f7;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#3498db,#27ae60);border-radius:4px;transition:width .5s ease;width:0%}
+.progress-text{font-size:.85rem;color:#64748b;text-align:center}
+.progress-step{display:flex;gap:12px;align-items:center;padding:8px 0;font-size:.85rem;color:#94a3b8}
+.progress-step .step-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.progress-step.pending .step-icon{background:#eef2f7;color:#94a3b8}
+.progress-step.running .step-icon{background:#f59e0b;color:#fff;animation:pulse 1.2s infinite}
+.progress-step.done .step-icon{background:#27ae60;color:#fff}
+.progress-step.failed .step-icon{background:#e74c3c;color:#fff}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* ========== Error Banner ========== */
+.error-banner{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin:12px 0;color:#dc2626;font-size:.85rem}
+.error-banner.visible{display:block}
+/* ========== Report Section ========== */
+.report{display:none;margin-top:24px}
+.report.visible{display:block}
+.report h2{font-size:1.4rem;font-weight:700;color:#1e293b;margin-bottom:18px;padding-bottom:8px;border-bottom:3px solid #3498db;display:inline-block}
+.report h3{font-size:1.1rem;font-weight:700;color:#2c3e50;margin:20px 0 10px}
+.report h4{font-size:.95rem;font-weight:600;color:#475569;margin:14px 0 8px}
+.report .skip-notice{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:20px;text-align:center;color:#94a3b8;font-size:.9rem;margin:12px 0}
+/* Card */
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:20px;margin-bottom:16px}
+.card-title{font-size:1.05rem;font-weight:700;color:#1e293b;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+/* Tags */
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.tag-blue{background:#dbeafe;color:#1d4ed8}
+.tag-green{background:#d1fae5;color:#065f46}
+.tag-orange{background:#fef3c7;color:#92400e}
+.tag-red{background:#fee2e2;color:#991b1b}
+.tag-gray{background:#f1f5f9;color:#475569}
+/* Status dots */
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-dot.matched{background:#27ae60}
+.status-dot.partial{background:#f59e0b}
+.status-dot.gap{background:#e74c3c}
+.status-dot.not_mentioned{background:#94a3b8}
+/* ========== Match Score Ring ========== */
+.match-ring-wrap{display:flex;flex-direction:column;align-items:center;margin:12px 0}
+.match-ring{width:120px;height:120px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.match-ring-inner{position:absolute;width:88px;height:88px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.match-ring-value{font-size:2rem;font-weight:800;color:#2c3e50;line-height:1}
+.match-ring-label{font-size:.7rem;color:#94a3b8}
+/* ========== Table ========== */
+.report table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}
+.report table th{background:#f1f5f9;padding:8px 10px;text-align:left;font-weight:600;color:#475569;border-bottom:2px solid #e2e8f0}
+.report table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.report table tr:hover td{background:#fafbfc}
+/* ========== Skills Grid ========== */
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.skill-item{background:#f8fafc;border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
+/* ========== Lists ========== */
+.report ul,.report ol{padding-left:20px;margin:8px 0}
+.report li{margin-bottom:6px;font-size:.9rem;color:#334155}
+/* ========== Intro Tabs ========== */
+.tab-wrap{display:flex;gap:8px;margin-bottom:12px}
+.tab-label{padding:8px 20px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:#f1f5f9;color:#64748b;transition:.2s;user-select:none}
+.tab-label:hover{background:#e2e8f0}
+.tab-radio{display:none}
+.tab-radio:checked+.tab-label{background:#3498db;color:#fff}
+.tab-content{display:none;background:#f8fafc;border-radius:8px;padding:16px}
+.tab-radio:checked~.tab-content{display:block}
+/* ========== Q&A Accordion ========== */
+.qa-item{border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.qa-summary{padding:12px 16px;cursor:pointer;font-weight:600;font-size:.9rem;background:#f8fafc;display:flex;align-items:center;gap:8px;user-select:none}
+.qa-summary:hover{background:#f1f5f9}
+.qa-summary::-webkit-details-marker{display:none}
+.qa-summary::before{content:'+';font-weight:700;color:#3498db;transition:transform .2s}
+details[open] .qa-summary::before{content:'−'}
+.qa-body{padding:12px 16px;font-size:.85rem;color:#475569;line-height:1.8}
+.qa-body strong{color:#2c3e50}
+.qa-body .answer-block{background:#f8fafc;border-left:3px solid #3498db;padding:8px 12px;margin:6px 0;border-radius:0 6px 6px 0}
+.qa-body .followup-block{background:#fffbeb;border-left:3px solid #f59e0b;padding:8px 12px;margin:6px 0;border-radius:0 6px 6px 0}
+.qa-category-stats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.qa-category-stats .stat-item{font-size:.78rem;padding:4px 10px;border-radius:12px;background:#f1f5f9}
+/* ========== Coding ========== */
+.code-block{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;font-family:"Fira Code","Source Code Pro","SF Mono",Menlo,Consolas,monospace;font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#1e293b;margin:8px 0}
+/* ========== Resource Cards ========== */
+.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.resource-card{border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:.85rem}
+.resource-card .rc-title{font-weight:600;color:#1e293b;margin-bottom:4px}
+.resource-card .rc-meta{font-size:.78rem;color:#94a3b8;margin-bottom:4px}
+.resource-card .rc-reason{color:#475569;font-size:.82rem}
+.resource-card.priority-high{border-left:3px solid #e74c3c}
+.resource-card.priority-medium{border-left:3px solid #f59e0b}
+.resource-card.priority-low{border-left:3px solid #94a3b8}
+/* ========== Knowledge Points ========== */
+.kp-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.kp-item{background:#eef2ff;color:#4338ca;padding:4px 12px;border-radius:14px;font-size:.8rem}
+/* ========== Loading Spinner ========== */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ========== Skip/None Notice ========== */
+.none-notice{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:16px;text-align:center;color:#94a3b8;font-size:.9rem;margin:8px 0}
+/* ========== Footer ========== */
+.footer{text-align:center;padding:24px 0;color:#94a3b8;font-size:.8rem;margin-top:24px;border-top:1px solid #e2e8f0}
+/* ========== Responsive ========== */
+@media(max-width:640px){
+  .container{padding:12px}
+  .header h1{font-size:1.3rem}
+  .form-row{grid-template-columns:1fr}
+  .config-row{flex-direction:column}
+  .skills-grid,.resource-grid{grid-template-columns:1fr}
+  .tab-wrap{flex-direction:column}
+  .match-ring{width:100px;height:100px}
+  .match-ring-inner{width:72px;height:72px}
+  .match-ring-value{font-size:1.6rem}
+}
+@media print{
+  .input-section,.config-row,.btn,.progress-area,.error-banner,.footer,.header .badge{display:none!important}
+  .report.visible{display:block!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  *{print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="header">
+  <div class="container">
+    <h1>AI 面试准备方案生成器</h1>
+    <p>上传职位描述（JD）和简历，自动生成结构化面试准备方案</p>
+    <div class="badge">v0.1.0 · 浏览器端运行</div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ========== INPUT SECTION ========== -->
+<section class="input-section" id="inputSection">
+  <!-- API Key -->
+  <div class="config-row">
+    <div class="form-group">
+      <label for="apiKey">OpenAI API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label for="modelSelect">模型</label>
+      <select id="modelSelect">
+        <option value="gpt-4o">GPT-4o (推荐)</option>
+        <option value="gpt-4o-mini">GPT-4o-mini (更快)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="jobType">岗位类型</label>
+      <select id="jobType">
+        <option value="unknown">自动识别</option>
+        <option value="tech">技术岗位（含编码题）</option>
+        <option value="non_tech">非技术岗位（跳过编码题）</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="jdText">职位描述 (JD) <span style="color:#e74c3c">*</span></label>
+      <textarea id="jdText" placeholder="粘贴 JD 文本内容（支持中英文）"></textarea>
+      <div class="char-count"><span id="jdCount">0</span> 字符</div>
+    </div>
+    <div class="form-group">
+      <label for="resumeText">简历 <span style="color:#e74c3c">*</span></label>
+      <textarea id="resumeText" placeholder="粘贴简历文本内容"></textarea>
+      <div class="char-count"><span id="resumeCount">0</span> 字符</div>
+    </div>
+  </div>
+
+  <div class="form-group" style="margin-bottom:12px">
+    <label for="candidateName">候选人姓名（可选）</label>
+    <input type="text" id="candidateName" placeholder="如：张三">
+  </div>
+
+  <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()">
+    🚀 生成面试准备方案
+  </button>
+</section>
+
+<!-- ========== ERROR BANNER ========== -->
+<div class="error-banner" id="errorBanner"></div>
+
+<!-- ========== PROGRESS ========== -->
+<div class="progress-area" id="progressArea">
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">初始化...</div>
+  <div style="margin-top:14px">
+    <div class="progress-step" id="step-precheck"><span class="step-icon">✓</span> 输入校验</div>
+    <div class="progress-step" id="step-jd"><span class="step-icon">1</span> JD 理解与分析</div>
+    <div class="progress-step" id="step-gap"><span class="step-icon">2</span> 简历-JD 匹配分析</div>
+    <div class="progress-step" id="step-coding"><span class="step-icon">3</span> 编码题生成</div>
+    <div class="progress-step" id="step-intro"><span class="step-icon">4</span> 自我介绍生成</div>
+    <div class="progress-step" id="step-qa"><span class="step-icon">5</span> 面试问答生成</div>
+    <div class="progress-step" id="step-resource"><span class="step-icon">6</span> 学习资料推荐</div>
+    <div class="progress-step" id="step-render"><span class="step-icon">☆</span> 生成报告</div>
+  </div>
+</div>
+
+<!-- ========== REPORT ========== -->
+<div class="report" id="reportArea">
+
+<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+  <div>
+    <div style="font-size:.85rem;color:#94a3b8">面试准备方案</div>
+    <div style="font-size:1.2rem;font-weight:700;color:#1e293b" id="reportTitle">报告</div>
+  </div>
+  <div style="text-align:right;font-size:.8rem;color:#94a3b8">
+    <div>生成时间：<span id="reportTime">-</span></div>
+    <div>候选人：<span id="reportCandidate">-</span></div>
+  </div>
+</div>
+
+<!-- Chapter 1: JD Analysis -->
+<section>
+  <h2>一、JD 核心分析</h2>
+  <div id="chapter1"></div>
+</section>
+
+<!-- Chapter 2: Gap Analysis -->
+<section>
+  <h2>二、简历匹配分析</h2>
+  <div id="chapter2"></div>
+</section>
+
+<!-- Chapter 3: Self Intro -->
+<section>
+  <h2>三、自我介绍方案</h2>
+  <div id="chapter3"></div>
+</section>
+
+<!-- Chapter 4: Q&A -->
+<section>
+  <h2>四、面试问答题库</h2>
+  <div id="chapter4"></div>
+</section>
+
+<!-- Chapter 5: Coding -->
+<section>
+  <h2>五、笔试编码题</h2>
+  <div id="chapter5"></div>
+</section>
+
+<!-- Chapter 6: Resources -->
+<section>
+  <h2>六、学习资料推荐</h2>
+  <div id="chapter6"></div>
+</section>
+</div>
+
+<div class="footer">AI 面试准备方案生成器 v0.1.0 | 基于 LLM 自动分析，仅供参考，不构成面试承诺</div>
+</div>
+
+<script>
+// ========== SYSTEM PROMPTS (from Python prompts/) ==========
+const PROMPTS = {
+  jd_analyzer: `你是一位资深的招聘分析师和职业顾问。你的任务是对给定的职位描述（JD）进行深入分析，提取结构化信息。
+
+请遵循以下原则：
+1. 客观准确：严格基于 JD 原文，不自行添加未提及的要求。
+2. 分类清晰：将技能区分为硬性技能（技术/专业）和软技能（沟通/协作等）。
+3. 级别判断：根据经验年限要求和职责描述准确判断岗位级别。
+4. 关键评价维度：从 JD 中提炼出面试官最可能用来评估候选人的维度。
+
+输出为 JSON 对象，包含以下字段：
+- position_title: 岗位名称
+- company_industry: 公司行业（或 null）
+- summary: JD 核心摘要（100字以内）
+- core_responsibilities: 核心职责列表（3-8条）
+- hard_skills: 硬性技能数组，每项含 {tech_name, proficiency_level(了解/熟悉/精通/专家), is_required(boolean), reason_from_jd(引用依据)}
+- soft_skills: 软技能数组，每项含 {skill_name, context}
+- experience_requirement: {min_years(整数), preferred_industry(数组), preferred_role(字符串或null)}
+- education_requirement: 学历要求（或null）
+- role_level: 岗位级别（校招/初中级/高级/资深/专家/管理）
+- key_evaluation_criteria: 面试评价的关键维度（3-5条）
+
+is_required: true=必备条件中明确列出, false=加分项中提到`,
+
+  gap_analyzer: `你是一位资深的招聘匹配分析师。你的任务是将候选人简历与 JD 分析结果进行逐项对比，找出匹配度和差距。
+
+请遵循以下原则：
+1. 给予客观的匹配评分（0-100），要基于实际证据。
+2. 匹配状态: matched(简历明确体现且水平相当或更高), partial(有相关经验但未完全达到), gap(明显缺乏), not_mentioned(未提及)
+3. 优先级的弥补优先级: 1=硬性要求有显著差距, 2=加分项或部分匹配, 3=影响较小
+4. 准备策略要个性化，结合具体差距给出可执行的准备方向。
+
+输出为 JSON 对象，包含：
+- resume_summary: {years_of_experience(整数), current_role(字符串或null), education_background(字符串或null), notable_projects(最多5个)}
+- overall_match_score: 匹配度 0-100
+- skill_match_details: 数组，每项含 {skill_name, skill_type(tech/soft/domain), requirement_level, candidate_level(或null), match_status(matched/partial/gap/not_mentioned), evidence_from_resume(或null), gap_description(或null), priority(1-3)}
+- strengths: 核心优势（3-5条）
+- top_gaps: 最需弥补的差距（3-5条）
+- risk_areas: 高风险领域
+- preparation_strategy: 个性化准备策略建议（150-200字）`,
+
+  self_intro: `你是一位面试辅导专家。你的任务是基于 JD 分析和差距分析结果，生成适合该候选人的自我介绍脚本。
+
+请遵循以下原则：
+1. 每个版本突出不同侧重点，都必须：先简要介绍背景，突出与 JD 最匹配的核心优势（引用具体数据或项目），展示热情，结尾过渡到面试环节。
+2. 1分钟：突出最重要的2-3个亮点
+3. 2分钟：适度展开，兼顾技术能力和项目经验
+4. 3分钟：完整展示职业发展脉络
+5. 避免暴露明显短板，将潜在短板转化为学习意愿
+
+输出为 JSON，包含：
+- versions: 数组，每项含 {duration(1min/2min/3min), target_scenario(适用场景), script(完整脚本), key_highlights(亮点数组)}
+- usage_tips: 表达技巧与注意事项数组
+- common_mistakes_to_avoid: 应避免的常见错误数组`,
+
+  qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库。
+
+请遵循以下原则：
+1. 题目覆盖以下维度：tech_deep_dive(技术深度), experience_probe(项目经历追问), behavioral(行为面试), scenario(情景题), hr(HR通用), motivation(动机匹配)
+2. 难度分布：easy:medium:hard ≈ 2:5:3
+3. 参考答案要点必须结合候选人简历中的具体项目和数据
+4. 对 gap 领域生成针对性问题
+5. 标注考察维度
+
+输出为 JSON，包含：
+- total_questions: 整数
+- questions: 数组，每项含 {question_number, category, difficulty(easy/medium/hard), question_text, evaluation_dimension, answer_framework(或null), reference_answer_key_points(数组), suggested_time_limit, follow_up_hints(数组或null)}
+- focus_areas_advice: 面试准备重点领域建议`,
+
+  coding_agent: `你是一位技术面试的出题专家。你的任务是基于 JD 要求的技术栈和候选人简历中的编程能力，生成适合面试的编码题目。
+
+请遵循以下原则：
+1. 难度递进：2 easy + 3 medium + 2 hard（共7题）
+2. 知识点覆盖与 JD 技术栈相关
+3. 参考代码语言优先使用候选人简历中的常用语言
+4. 解题提示从浅入深
+
+输出为 JSON，包含：
+- total_problems: 整数
+- language_recommendation: 推荐编程语言
+- problems: 数组，每项含 {problem_number, title, difficulty(easy/medium/hard), estimated_time, topic_tags(数组), problem_description, examples(数组[{input,output}]), constraints(数组), hints(数组), solution_approach, reference_code_language, reference_code_snippet, complexity_analysis, related_leetcode_problems(数组或null)}
+- preparation_tips: 备考贴士`,
+
+  resource_agent: `你是一位职业学习规划师。你的任务是基于差距分析结果，推荐针对性的学习资源。
+
+请遵循以下原则：
+1. 推荐直接对应差距分析中识别出的短板
+2. 资源类型多样化：book, online_course, documentation, video, practice_platform, article
+3. 优先级：high(对应priority=1), medium(对应priority=2), low(加分项)
+4. 给出3-5天的学习路径
+
+输出为 JSON，包含：
+- resources: 数组，每项含 {resource_type, title, target_skill, reason, url_or_reference(或null), estimated_time_required(或null), priority(high/medium/low), difficulty_level(beginner/intermediate/advanced)}
+- study_plan_summary: 3-5天学习路径
+- key_knowledge_points: 重点知识要点数组`
+};
+
+// ========== STATE ==========
+let isGenerating = false;
+
+// ========== CHARACTER COUNT ==========
+document.getElementById('jdText').addEventListener('input', function(){
+  document.getElementById('jdCount').textContent = this.value.length;
+});
+document.getElementById('resumeText').addEventListener('input', function(){
+  document.getElementById('resumeCount').textContent = this.value.length;
+});
+
+// ========== LOCAL STORAGE ==========
+const savedKey = localStorage.getItem('openai_api_key');
+if (savedKey) document.getElementById('apiKey').value = savedKey;
+document.getElementById('apiKey').addEventListener('change', function(){
+  localStorage.setItem('openai_api_key', this.value);
+});
+
+// ========== OPENAI CALL ==========
+async function callOpenAI(systemPrompt, userMessage) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('modelSelect').value;
+  if (!apiKey) throw new Error('请先输入 OpenAI API Key');
+
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: model,
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage }
+      ]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err.error?.message || `API 请求失败 (${resp.status})`);
+  }
+
+  const data = await resp.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('API 响应为空');
+  return JSON.parse(content);
+}
+
+// ========== STEP HELPERS ==========
+function setStep(id, status) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'progress-step ' + status;
+  const icon = el.querySelector('.step-icon');
+  if (status === 'pending') icon.textContent = '○';
+  else if (status === 'running') { icon.textContent = '●'; }
+  else if (status === 'done') icon.textContent = '✓';
+  else if (status === 'failed') icon.textContent = '✗';
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = text;
+}
+
+function showError(msg) {
+  const banner = document.getElementById('errorBanner');
+  banner.textContent = msg;
+  banner.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('visible');
+}
+
+// ========== MAIN GENERATION ==========
+async function startGenerate() {
+  if (isGenerating) return;
+  isGenerating = true;
+  hideError();
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 生成中...';
+
+  const jdText = document.getElementById('jdText').value.trim();
+  const resumeText = document.getElementById('resumeText').value.trim();
+  const candidateName = document.getElementById('candidateName').value.trim() || '候选人';
+  const jobType = document.getElementById('jobType').value;
+
+  // Validation
+  if (jdText.length < 50) { showError('JD 文本至少需要 50 个字符'); resetBtn(); return; }
+  if (resumeText.length < 50) { showError('简历文本至少需要 50 个字符'); resetBtn(); return; }
+  if (!document.getElementById('apiKey').value.trim()) { showError('请先输入 OpenAI API Key'); resetBtn(); return; }
+
+  // Show progress
+  document.getElementById('progressArea').classList.add('visible');
+  document.getElementById('reportArea').classList.remove('visible');
+  document.getElementById('reportTitle').textContent = candidateName + ' · 面试准备方案';
+  document.getElementById('reportTime').textContent = new Date().toLocaleString('zh-CN');
+  document.getElementById('reportCandidate').textContent = candidateName;
+
+  const steps = ['step-precheck','step-jd','step-gap','step-coding','step-intro','step-qa','step-resource','step-render'];
+  steps.forEach(s => setStep(s, 'pending'));
+
+  let results = {};
+
+  try {
+    // Step: precheck
+    setStep('step-precheck', 'done');
+    setProgress(5, '输入校验通过，开始分析...');
+
+    // Step 1: JD Analysis
+    setStep('step-jd', 'running');
+    setProgress(15, '正在分析 JD...');
+    const jdResult = await callOpenAI(PROMPTS.jd_analyzer,
+      `请分析以下职位描述（JD）：\n\n${jdText}`
+    );
+    results.jd = jdResult;
+    setStep('step-jd', 'done');
+    setProgress(30, 'JD 分析完成，进行匹配分析...');
+
+    // Step 2: Gap Analysis
+    setStep('step-gap', 'running');
+    const jdSummary = `【JD分析摘要】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n级别: ${jdResult.role_level}`;
+    const gapResult = await callOpenAI(PROMPTS.gap_analyzer,
+      jdSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + '\n\n请进行详细的匹配分析。'
+    );
+    results.gap = gapResult;
+    setStep('step-gap', 'done');
+    setProgress(45, '匹配分析完成...');
+
+    // Step 3: Coding (conditional)
+    const isTech = jobType === 'tech' ||
+      (jobType === 'unknown' && jdResult.hard_skills && jdResult.hard_skills.length > 0 &&
+       (jdResult.position_title.toLowerCase().includes('开发') ||
+        jdResult.position_title.toLowerCase().includes('工程师') ||
+        jdResult.position_title.toLowerCase().includes('算法') ||
+        jdResult.position_title.toLowerCase().includes('数据') ||
+        jdResult.position_title.toLowerCase().includes('后端') ||
+        jdResult.position_title.toLowerCase().includes('前端') ||
+        jdResult.position_title.toLowerCase().includes('全栈')));
+
+    if (isTech) {
+      setStep('step-coding', 'running');
+      setProgress(50, '生成编码题...');
+      const techSkills = (jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ');
+      const codingResult = await callOpenAI(PROMPTS.coding_agent,
+        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'未知'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'未知'}\n\n请生成适合该岗位面试的编码题目。`
+      );
+      results.coding = codingResult;
+      setStep('step-coding', 'done');
+    } else {
+      results.coding = null;
+      setStep('step-coding', 'done');
+    }
+    setProgress(60, '自我介绍生成...');
+
+    // Step 4: Self Intro
+    setStep('step-intro', 'running');
+    const introResult = await callOpenAI(PROMPTS.self_intro,
+      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'?'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'?'}\n项目: ${((gapResult.resume_summary||{}).notable_projects||[]).join('; ')}\n\n请生成适合该候选人的自我介绍方案。`
+    );
+    results.intro = introResult;
+    setStep('step-intro', 'done');
+    setProgress(70, '生成面试问答...');
+
+    // Step 5: Q&A
+    setStep('step-qa', 'running');
+    const qaResult = await callOpenAI(PROMPTS.qa_generator,
+      `【简历原文】\n${resumeText}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成全面的面试问答题库。`
+    );
+    results.qa = qaResult;
+    setStep('step-qa', 'done');
+    setProgress(85, '推荐学习资料...');
+
+    // Step 6: Resources
+    setStep('step-resource', 'running');
+    const resourceResult = await callOpenAI(PROMPTS.resource_agent,
+      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源。`
+    );
+    results.resources = resourceResult;
+    setStep('step-resource', 'done');
+    setProgress(95, '渲染报告...');
+
+    // Step 7: Render
+    setStep('step-render', 'running');
+    renderReport(results, candidateName);
+    setStep('step-render', 'done');
+    setProgress(100, '完成！');
+
+    document.getElementById('reportArea').classList.add('visible');
+    document.getElementById('reportArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch (err) {
+    showError(err.message || '生成过程中发生错误');
+    const currentStep = ['step-jd','step-gap','step-coding','step-intro','step-qa','step-resource','step-render']
+      .find(s => document.getElementById(s)?.classList.contains('running'));
+    if (currentStep) setStep(currentStep, 'failed');
+  }
+
+  resetBtn();
+}
+
+function resetBtn() {
+  isGenerating = false;
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = false;
+  btn.innerHTML = '🚀 生成面试准备方案';
+}
+
+// ========== RENDER FUNCTIONS ==========
+function renderReport(results, candidateName) {
+  const { jd, gap, intro, qa, coding, resources } = results;
+
+  renderChapter1(jd);
+  renderChapter2(gap);
+  renderChapter3(intro);
+  renderChapter4(qa);
+  renderChapter5(coding);
+  renderChapter6(resources);
+}
+
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) Object.entries(attrs).forEach(([k,v]) => {
+    if (k === 'className') e.className = v;
+    else if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else if (k.startsWith('on')) e[k] = v;
+    else if (k === 'innerHTML') e.innerHTML = v;
+    else e.setAttribute(k, v);
+  });
+  children.forEach(c => { if (c != null) e.append(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+
+function renderChapter1(jd) {
+  const container = document.getElementById('chapter1');
+  container.innerHTML = '';
+  if (!jd) {
+    container.append(el('div', {className:'none-notice'}, 'JD 分析模块暂未生成，请检查输入'));
+    return;
+  }
+
+  // Summary card
+  const summaryCard = el('div', {className:'card'},
+    el('div', {className:'card-title'}, jd.position_title || '未知岗位'),
+    el('p', {style:{fontSize:'.9rem',color:'#475569',marginBottom:'8px'}}, jd.summary || ''),
+    el('div', {style:{display:'flex',flexWrap:'wrap',gap:'8px'}},
+      jd.role_level ? el('span',{className:'tag tag-blue'}, jd.role_level) : null,
+      jd.company_industry ? el('span',{className:'tag tag-gray'}, jd.company_industry) : null,
+      jd.education_requirement ? el('span',{className:'tag tag-gray'}, jd.education_requirement) : null,
+      jd.experience_requirement?.min_years > 0 ? el('span',{className:'tag tag-blue'}, jd.experience_requirement.min_years+'年+经验') : null
+    )
+  );
+  container.append(summaryCard);
+
+  // Core responsibilities
+  if (jd.core_responsibilities && jd.core_responsibilities.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '核心职责'),
+      el('ul', null, ...jd.core_responsibilities.map(r => el('li', null, r)))
+    );
+    container.append(card);
+  }
+
+  // Hard skills table
+  if (jd.hard_skills && jd.hard_skills.length) {
+    const rows = jd.hard_skills.map(s =>
+      el('tr', null,
+        el('td', {style:{fontWeight:600}}, s.tech_name),
+        el('td', null, el('span',{className:'tag '+(s.is_required?'tag-blue':'tag-gray')}, s.is_required ? '必备' : '加分')),
+        el('td', null, s.proficiency_level),
+        el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, s.reason_from_jd)
+      )
+    );
+    const table = el('table', null,
+      el('thead', null, el('tr', null, ['技术/技能','类型','要求等级','JD依据'].map(h => el('th', null, h)))),
+      el('tbody', null, ...rows)
+    );
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '硬性技能要求'),
+      table
+    );
+    container.append(card);
+  }
+
+  // Soft skills
+  if (jd.soft_skills && jd.soft_skills.length) {
+    const items = jd.soft_skills.map(s =>
+      el('div', {className:'skill-item'},
+        el('span', {style:{fontWeight:600}}, s.skill_name),
+        el('span', {style:{fontSize:'.8rem',color:'#64748b'}}, s.context)
+      )
+    );
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '软技能要求'),
+      el('div', {className:'skills-grid'}, ...items)
+    );
+    container.append(card);
+  }
+
+  // Evaluation criteria
+  if (jd.key_evaluation_criteria && jd.key_evaluation_criteria.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '面试评价维度'),
+      el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px'}},
+        ...jd.key_evaluation_criteria.map(c => el('span',{className:'tag tag-blue'}, c))
+      )
+    );
+    container.append(card);
+  }
+}
+
+function renderChapter2(gap) {
+  const container = document.getElementById('chapter2');
+  container.innerHTML = '';
+  if (!gap) {
+    container.append(el('div', {className:'none-notice'}, '匹配分析模块暂未生成'));
+    return;
+  }
+
+  // Match score ring
+  const score = gap.overall_match_score || 0;
+  const angle = score * 3.6;
+  const ringColor = score >= 80 ? '#27ae60' : score >= 60 ? '#f59e0b' : '#e74c3c';
+  const ringCard = el('div', {className:'card'},
+    el('div', {className:'match-ring-wrap'},
+      el('div', {className:'match-ring', style:{background:`conic-gradient(${ringColor} ${angle}deg, #eef2f7 ${angle}deg 360deg)`}},
+        el('div', {className:'match-ring-inner'},
+          el('div', {className:'match-ring-value'}, score),
+          el('div', {className:'match-ring-label'}, '匹配度')
+        )
+      )
+    )
+  );
+  container.append(ringCard);
+
+  // Resume summary
+  const rs = gap.resume_summary || {};
+  const summaryCard = el('div', {className:'card'},
+    el('div', {className:'card-title'}, '简历摘要'),
+    el('div', {style:{fontSize:'.9rem',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}},
+      el('div', null, el('strong', null, '工作年限：'), String(rs.years_of_experience || 0)+'年'),
+      rs.current_role ? el('div', null, el('strong', null, '当前角色：'), rs.current_role) : null,
+      rs.education_background ? el('div', null, el('strong', null, '教育背景：'), rs.education_background) : null,
+    ),
+    rs.notable_projects?.length ? el('div', {style:{marginTop:'8px',fontSize:'.9rem'}},
+      el('strong', null, '突出项目：'),
+      el('ul', null, ...rs.notable_projects.map(p => el('li', null, p)))
+    ) : null
+  );
+  container.append(summaryCard);
+
+  // Match details table
+  if (gap.skill_match_details && gap.skill_match_details.length) {
+    const rows = gap.skill_match_details.map(s => {
+      const statusLabel = {matched:'匹配', partial:'部分匹配', gap:'差距', not_mentioned:'未提及'}[s.match_status] || s.match_status;
+      return el('tr', null,
+        el('td', {style:{fontWeight:600}}, s.skill_name),
+        el('td', null, el('span',{className:'tag tag-gray'}, s.skill_type==='tech'?'技术':s.skill_type==='soft'?'软技能':'领域')),
+        el('td', null, s.requirement_level),
+        el('td', null, s.candidate_level || '-'),
+        el('td', null,
+          el('span',{className:'status-dot '+s.match_status}),
+          statusLabel
+        ),
+        el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, s.gap_description || '')
+      );
+    });
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '技能匹配详情'),
+      el('div', {style:{overflowX:'auto'}},
+        el('table', null,
+          el('thead', null, el('tr', null, ['技能','类型','要求','候选水平','匹配状态','差距描述'].map(h => el('th', null, h)))),
+          el('tbody', null, ...rows)
+        )
+      )
+    );
+    container.append(card);
+  }
+
+  // Strengths
+  if (gap.strengths && gap.strengths.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, el('span',{style:{color:'#27ae60'}},'✓'), ' 核心优势'),
+      el('ul', null, ...gap.strengths.map(s => el('li', null, s)))
+    );
+    container.append(card);
+  }
+
+  // Risk areas
+  if (gap.risk_areas && gap.risk_areas.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, el('span',{style:{color:'#e74c3c'}},'!'), ' 风险预警'),
+      el('ul', null, ...gap.risk_areas.map(r => el('li', null, r)))
+    );
+    container.append(card);
+  }
+
+  // Preparation strategy
+  if (gap.preparation_strategy) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '准备策略建议'),
+      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8}}, gap.preparation_strategy)
+    );
+    container.append(card);
+  }
+}
+
+function renderChapter3(intro) {
+  const container = document.getElementById('chapter3');
+  container.innerHTML = '';
+  if (!intro || !intro.versions || !intro.versions.length) {
+    container.append(el('div', {className:'none-notice'}, '自我介绍方案暂未生成'));
+    return;
+  }
+
+  // Tab radio buttons
+  const tabWrap = el('div', {className:'tab-wrap'});
+  const tabContents = [];
+  intro.versions.forEach((v, i) => {
+    const id = 'intro-tab-'+i;
+    const radio = el('input', {type:'radio',name:'introTab',id,className:'tab-radio'});
+    if (i === 0) radio.checked = true;
+    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' · ' + v.target_scenario);
+    tabWrap.append(radio, label);
+
+    const content = el('div', {className:'tab-content'},
+      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:2,marginBottom:'10px',whiteSpace:'pre-wrap'}}, v.script),
+      v.key_highlights?.length ? el('div', null,
+        el('strong', {style:{fontSize:'.85rem'}}, '核心亮点：'),
+        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}},
+          ...v.key_highlights.map(h => el('span',{className:'tag tag-green'}, h))
+        )
+      ) : null
+    );
+    tabContents.push(content);
+    // CSS trick: checked radio triggers sibling display
+    const wrapper = el('div', {style:{display:'inline'}}, radio, label, content);
+    tabWrap.append(radio, label, content);
+  });
+
+  // Clean up - only add one set
+  container.innerHTML = '';
+  const tabContainer = el('div', null);
+  const styleTag = document.createElement('style');
+  styleTag.textContent = `
+    input.tab-radio { display: none; }
+    input.tab-radio + .tab-label + .tab-content { display: none; }
+    input.tab-radio:checked + .tab-label + .tab-content { display: block; }
+    input.tab-radio + .tab-label { display: inline-block; padding: 8px 20px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; background: #f1f5f9; color: #64748b; transition: .2s; user-select: none; margin-right: 8px; margin-bottom: 8px; }
+    input.tab-radio:checked + .tab-label { background: #3498db; color: #fff; }
+    .tab-content { background: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 8px; }
+  `;
+  tabContainer.append(styleTag);
+
+  intro.versions.forEach((v, i) => {
+    const id = 'intro-tab-'+i;
+    const radio = el('input', {type:'radio',name:'introTab',id,className:'tab-radio'});
+    if (i === 0) radio.checked = true;
+    const label = el('label', {htmlFor:id,className:'tab-label'}, v.duration + ' · ' + v.target_scenario);
+    const content = el('div', {className:'tab-content'},
+      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:2,marginBottom:'10px',whiteSpace:'pre-wrap'}}, v.script),
+      v.key_highlights?.length ? el('div', null,
+        el('strong', {style:{fontSize:'.85rem'}}, '核心亮点：'),
+        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}},
+          ...v.key_highlights.map(h => el('span',{className:'tag tag-green'}, h))
+        )
+      ) : null
+    );
+    tabContainer.append(radio, label, content);
+  });
+
+  const card = el('div', {className:'card'}, tabContainer);
+  container.append(card);
+
+  // Usage tips
+  if (intro.usage_tips && intro.usage_tips.length) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '表达技巧'),
+      el('ul', null, ...intro.usage_tips.map(t => el('li', null, t)))
+    ));
+  }
+
+  // Mistakes to avoid
+  if (intro.common_mistakes_to_avoid && intro.common_mistakes_to_avoid.length) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, el('span',{style:{color:'#e74c3c'}},'✗'), ' 注意事项'),
+      el('ul', null, ...intro.common_mistakes_to_avoid.map(m => el('li', null, m)))
+    ));
+  }
+}
+
+function renderChapter4(qa) {
+  const container = document.getElementById('chapter4');
+  container.innerHTML = '';
+  if (!qa || !qa.questions || !qa.questions.length) {
+    container.append(el('div', {className:'none-notice'}, '面试问答题库暂未生成'));
+    return;
+  }
+
+  // Category stats
+  const cats = {};
+  qa.questions.forEach(q => { cats[q.category] = (cats[q.category]||0)+1; });
+  const catLabels = {tech_deep_dive:'技术深度', experience_probe:'经历追问', behavioral:'行为面试', scenario:'情景题', hr:'HR问题', motivation:'动机匹配'};
+
+  const statsWrap = el('div', {className:'qa-category-stats'},
+    ...Object.entries(cats).map(([k,v]) =>
+      el('span',{className:'stat-item'}, (catLabels[k]||k)+': '+v+'题')
+    ),
+    el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+qa.total_questions+' 题')
+  );
+
+  const questionsList = qa.questions.map((q, idx) => {
+    const diffTag = q.difficulty === 'easy' ? 'tag-green' : q.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
+    const catLabel = catLabels[q.category] || q.category;
+
+    const bodyParts = [
+      el('div', {style:{marginBottom:'6px',fontSize:'.8rem'}},
+        el('span',{className:'tag '+diffTag}, q.difficulty),
+        ' ',
+        el('span',{className:'tag tag-gray'}, catLabel),
+        ' ',
+        el('span',{style:{color:'#94a3b8',fontSize:'.78rem'}}, '考察维度: '+q.evaluation_dimension),
+        q.suggested_time_limit ? el('span',{style:{color:'#94a3b8',fontSize:'.78rem',marginLeft:'8px'}}, '建议时长: '+q.suggested_time_limit) : null
+      )
+    ];
+
+    if (q.answer_framework) {
+      bodyParts.push(el('div', {style:{marginBottom:'6px'}}, el('span',{className:'tag tag-blue'}, '框架: '+q.answer_framework)));
+    }
+
+    bodyParts.push(el('div', {className:'answer-block'},
+      el('strong', null, '参考答案要点：'),
+      el('ul', null, ...q.reference_answer_key_points.map(p => el('li', null, p)))
+    ));
+
+    if (q.follow_up_hints && q.follow_up_hints.length) {
+      bodyParts.push(el('div', {className:'followup-block'},
+        el('strong', null, '追问方向：'),
+        el('ul', null, ...q.follow_up_hints.map(h => el('li', null, h)))
+      ));
+    }
+
+    return el('details', {className:'qa-item'},
+      el('summary', {className:'qa-summary'}, q.question_number+'. '+q.question_text),
+      el('div', {className:'qa-body'}, ...bodyParts)
+    );
+  });
+
+  container.append(el('div', {className:'card'},
+    statsWrap,
+    ...questionsList
+  ));
+
+  if (qa.focus_areas_advice) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '备考建议'),
+      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8}}, qa.focus_areas_advice)
+    ));
+  }
+}
+
+function renderChapter5(coding) {
+  const container = document.getElementById('chapter5');
+  container.innerHTML = '';
+  if (!coding) {
+    container.append(el('div', {className:'none-notice'}, '该岗位为非技术岗位，已跳过编码题生成'));
+    return;
+  }
+  if (!coding.problems || !coding.problems.length) {
+    container.append(el('div', {className:'none-notice'}, '编码题暂未生成'));
+    return;
+  }
+
+  if (coding.language_recommendation) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '推荐编程语言'),
+      el('span',{className:'tag tag-blue',style:{fontSize:'.9rem',padding:'4px 14px'}}, coding.language_recommendation)
+    ));
+  }
+
+  coding.problems.forEach(p => {
+    const diffTag = p.difficulty === 'easy' ? 'tag-green' : p.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
+    const card = el('div', {className:'card'},
+      el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',marginBottom:'8px'}},
+        el('span', {style:{fontWeight:700,fontSize:'1rem'}}, '#'+p.problem_number+' '+p.title),
+        el('div', null,
+          el('span',{className:'tag '+diffTag}, p.difficulty),
+          ' ',
+          el('span',{className:'tag tag-gray'}, p.estimated_time)
+        )
+      ),
+      p.topic_tags?.length ? el('div', {style:{display:'flex',flexWrap:'wrap',gap:'4px',marginBottom:'8px'}},
+        ...p.topic_tags.map(t => el('span',{className:'tag tag-blue',style:{fontSize:'.72rem'}}, t))
+      ) : null,
+      el('p', {style:{fontSize:'.88rem',color:'#475569',marginBottom:'8px'}}, p.problem_description),
+
+      p.examples?.length ? el('div', null,
+        el('strong', {style:{fontSize:'.82rem'}}, '输入输出示例：'),
+        ...p.examples.map((ex,i) => el('div', {style:{fontSize:'.82rem',background:'#f1f5f9',padding:'6px 10px',borderRadius:'4px',margin:'4px 0',fontFamily:'monospace'}},
+          '输入: '+ex.input+'  →  输出: '+ex.output
+        ))
+      ) : null,
+
+      p.hints?.length ? el('div', {style:{fontSize:'.82rem',color:'#64748b',marginTop:'6px'}},
+        el('em', null, '提示: '+p.hints.join('; '))
+      ) : null,
+
+      p.solution_approach ? el('div', {style:{fontSize:'.85rem',marginTop:'8px'}},
+        el('strong', null, '解题思路：'), el('span',{style:{color:'#475569'}}, p.solution_approach)
+      ) : null,
+
+      p.reference_code_snippet ? el('div', {style:{marginTop:'8px'}},
+        el('strong', {style:{fontSize:'.82rem',display:'block',marginBottom:'4px'}}, '参考代码 ('+p.reference_code_language+')：'),
+        el('div', {className:'code-block'}, p.reference_code_snippet)
+      ) : null,
+
+      p.complexity_analysis ? el('div', {style:{marginTop:'6px',fontSize:.82,color:'#64748b'}},
+        el('em', null, p.complexity_analysis)
+      ) : null,
+
+      p.related_leetcode_problems?.length ? el('div', {style:{marginTop:'6px',fontSize:'.82rem'}},
+        el('span',{style:{color:'#94a3b8'}}, '相关 LeetCode: '),
+        ...p.related_leetcode_problems.map(l => el('span',{className:'tag tag-gray',style:{fontSize:'.72rem'}}, l))
+      ) : null
+    );
+    container.append(card);
+  });
+
+  if (coding.preparation_tips) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '备考贴士'),
+      el('p', {style:{fontSize:'.9rem',color:'#475569'}}, coding.preparation_tips)
+    ));
+  }
+}
+
+function renderChapter6(resources) {
+  const container = document.getElementById('chapter6');
+  container.innerHTML = '';
+  if (!resources || !resources.resources || !resources.resources.length) {
+    container.append(el('div', {className:'none-notice'}, '学习资料推荐暂未生成'));
+    return;
+  }
+
+  // Resource cards
+  const typeLabels = {book:'书籍', online_course:'在线课程', documentation:'文档', video:'视频', practice_platform:'练习平台', article:'文章'};
+
+  const cards = resources.resources.map(r => {
+    const priorityClass = 'priority-'+r.priority;
+    const diffLabel = {beginner:'入门', intermediate:'进阶', advanced:'深入'}[r.difficulty_level] || r.difficulty_level;
+    return el('div', {className:'resource-card '+priorityClass},
+      el('div', {className:'rc-title'}, r.title),
+      el('div', {className:'rc-meta'},
+        (typeLabels[r.resource_type] || r.resource_type),
+        ' · '+diffLabel,
+        r.estimated_time_required ? ' · '+r.estimated_time_required : '',
+        ' · '+el('span',{className:'tag '+(r.priority==='high'?'tag-red':r.priority==='medium'?'tag-orange':'tag-gray'),style:{fontSize:'.7rem'}}, {high:'高优先',medium:'中优先',low:'参考'}[r.priority] || r.priority)
+      ),
+      el('div', {className:'rc-reason'}, '针对: '+r.target_skill+' — '+r.reason)
+    );
+  });
+  container.append(el('div', {className:'card'},
+    el('div', {className:'card-title'}, '推荐学习资源'),
+    el('div', {className:'resource-grid'}, ...cards)
+  ));
+
+  // Study plan
+  if (resources.study_plan_summary) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '学习路径'),
+      el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,whiteSpace:'pre-wrap'}}, resources.study_plan_summary)
+    ));
+  }
+
+  // Knowledge points
+  if (resources.key_knowledge_points && resources.key_knowledge_points.length) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '重点知识要点'),
+      el('div', {className:'kp-list'},
+        ...resources.key_knowledge_points.map(p => el('span',{className:'kp-item'}, p))
+      )
+    ));
+  }
+}
+</script>
+</body>
+</html>

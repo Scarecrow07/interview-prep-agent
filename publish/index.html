@@ -1656,14 +1656,17 @@ function renderChapter1(jd) {
   }
 
   // Summary card
+  const expReq = jd.experience_requirement || jd.experience_requirements || {};
+  const eduReq = jd.education_requirement || jd.education_requirements;
+  const eduText = eduReq ? (typeof eduReq === 'string' ? eduReq : (eduReq.degree || '')) : '';
   const summaryCard = el('div', {className:'card'},
     el('div', {className:'card-title'}, jd.position_title || '未知岗位'),
     el('p', {style:{fontSize:'.9rem',color:'#475569',marginBottom:'8px'}}, jd.summary || ''),
     el('div', {style:{display:'flex',flexWrap:'wrap',gap:'8px'}},
       jd.role_level ? el('span',{className:'tag tag-blue'}, jd.role_level) : null,
-      jd.company_industry ? el('span',{className:'tag tag-gray'}, jd.company_industry) : null,
-      jd.education_requirement ? el('span',{className:'tag tag-gray'}, jd.education_requirement) : null,
-      jd.experience_requirement?.min_years > 0 ? el('span',{className:'tag tag-blue'}, jd.experience_requirement.min_years+'年+经验') : null
+      (jd.company_industry || jd.industry) ? el('span',{className:'tag tag-gray'}, jd.company_industry || jd.industry) : null,
+      eduText ? el('span',{className:'tag tag-gray'}, eduText) : null,
+      expReq.min_years > 0 ? el('span',{className:'tag tag-blue'}, expReq.min_years+'年+经验') : null
     )
   );
   container.append(summaryCard);
@@ -1698,14 +1701,19 @@ function renderChapter1(jd) {
     container.append(card);
   }
 
-  // Soft skills
+  // Soft skills (support both string array and object array formats)
   if (jd.soft_skills && jd.soft_skills.length) {
-    const items = jd.soft_skills.map(s =>
-      el('div', {className:'skill-item'},
-        el('span', {style:{fontWeight:600}}, s.skill_name),
-        el('span', {style:{fontSize:'.8rem',color:'#64748b'}}, s.context)
-      )
-    );
+    const items = jd.soft_skills.map(s => {
+      if (typeof s === 'string') {
+        return el('div', {className:'skill-item'},
+          el('span', {style:{fontWeight:600}}, s)
+        );
+      }
+      return el('div', {className:'skill-item'},
+        el('span', {style:{fontWeight:600}}, s.skill_name || s.skill || ''),
+        s.context ? el('span', {style:{fontSize:'.8rem',color:'#64748b'}}, s.context) : null
+      );
+    });
     const card = el('div', {className:'card'},
       el('div', {className:'card-title'}, '软技能要求'),
       el('div', {className:'skills-grid'}, ...items)
@@ -2100,7 +2108,7 @@ function renderChapter6(resources) {
   // Resource cards
   const typeLabels = {book:'书籍', online_course:'在线课程', documentation:'文档', video:'视频', practice_platform:'练习平台', article:'文章'};
 
-  const cards = (resources.resources || []).map(r => {
+  const cards = (resources.resources || []).filter(r => r && r.title).map(r => {
     const priorityClass = 'priority-'+r.priority;
     const diffLabel = {beginner:'入门', intermediate:'进阶', advanced:'深入'}[r.difficulty_level] || r.difficulty_level;
     return el('div', {className:'resource-card '+priorityClass},
@@ -2109,15 +2117,18 @@ function renderChapter6(resources) {
         (typeLabels[r.resource_type] || r.resource_type),
         ' · '+diffLabel,
         r.estimated_time_required ? ' · '+r.estimated_time_required : '',
-        ' · '+el('span',{className:'tag '+(r.priority==='high'?'tag-red':r.priority==='medium'?'tag-orange':'tag-gray'),style:{fontSize:'.7rem'}}, {high:'高优先',medium:'中优先',low:'参考'}[r.priority] || r.priority)
+        ' · ',
+        el('span',{className:'tag '+(r.priority==='high'?'tag-red':r.priority==='medium'?'tag-orange':'tag-gray'),style:{fontSize:'.7rem'}}, {high:'高优先',medium:'中优先',low:'参考'}[r.priority] || r.priority)
       ),
-      el('div', {className:'rc-reason'}, '针对: '+r.target_skill+' — '+r.reason)
+      el('div', {className:'rc-reason'}, '针对: '+(r.target_skill||'')+' — '+(r.reason||''))
     );
   });
-  container.append(el('div', {className:'card'},
-    el('div', {className:'card-title'}, '推荐学习资源'),
-    el('div', {className:'resource-grid'}, ...cards)
-  ));
+  if (cards.length) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '推荐学习资源'),
+      el('div', {className:'resource-grid'}, ...cards)
+    ));
+  }
 
   // Study plan
   if (resources.study_plan_summary) {

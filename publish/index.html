@@ -2272,7 +2272,7 @@ function renderChapter5(coding) {
 function renderChapter6(resources) {
   const container = document.getElementById('chapter6');
   container.innerHTML = '';
-  if (!resources || (!resources.resources?.length && !resources.study_plan_summary && !resources.crash_plan_24h?.length && !resources.key_knowledge_points?.length)) {
+  if (!resources || (!resources.resources?.length && !(resources.study_plan_summary||resources.study_plan) && !resources.crash_plan_24h?.length && !(resources.key_knowledge_points||resources.key_points)?.length)) {
     container.append(el('div', {className:'none-notice'}, '学习资料推荐暂未生成'));
     return;
   }
@@ -2282,17 +2282,18 @@ function renderChapter6(resources) {
 
   const cards = (resources.resources || []).filter(r => r && r.title).map(r => {
     const priorityClass = 'priority-'+r.priority;
-    const diffLabel = {beginner:'入门', intermediate:'进阶', advanced:'深入'}[r.difficulty_level] || r.difficulty_level;
+    const diffLevel = r.difficulty_level || r.difficulty || '';
+    const diffLabel = {beginner:'入门', intermediate:'进阶', advanced:'深入'}[diffLevel] || diffLevel;
     return el('div', {className:'resource-card '+priorityClass},
       el('div', {className:'rc-title'}, r.title),
       el('div', {className:'rc-meta'},
-        (typeLabels[r.resource_type] || r.resource_type),
+        (typeLabels[r.resource_type] || typeLabels[r.type] || r.resource_type || r.type || ''),
         ' · '+diffLabel,
-        r.estimated_time_required ? ' · '+r.estimated_time_required : '',
+        r.estimated_time_required ? ' · '+r.estimated_time_required : (r.time ? ' · '+r.time : ''),
         ' · ',
         el('span',{className:'tag '+(r.priority==='high'?'tag-red':r.priority==='medium'?'tag-orange':'tag-gray'),style:{fontSize:'.7rem'}}, {high:'高优先',medium:'中优先',low:'参考'}[r.priority] || r.priority)
       ),
-      el('div', {className:'rc-reason'}, '针对: '+(r.target_skill||'')+' — '+(r.reason||''))
+      el('div', {className:'rc-reason'}, '针对: '+(r.target_skill||r.skill||'')+' — '+(r.reason||''))
     );
   });
   if (cards.length) {
@@ -2302,16 +2303,17 @@ function renderChapter6(resources) {
     ));
   }
 
-  // Study plan - render as itemized list
-  if (resources.study_plan_summary) {
-    const rawLines = resources.study_plan_summary.split(/\n+/).map(l => l.trim()).filter(l => l);
+  // Study plan - render as itemized list (support study_plan_summary and study_plan)
+  const studyPlan = resources.study_plan_summary || resources.study_plan;
+  if (studyPlan) {
+    const rawLines = studyPlan.split(/\n+/).map(l => l.trim()).filter(l => l);
     let planContent;
     if (rawLines.length > 1) {
       planContent = el('ul', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,paddingLeft:'20px',margin:'0'}},
         ...rawLines.map(l => el('li', {style:{marginBottom:'6px'}}, l))
       );
     } else {
-      planContent = el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,whiteSpace:'pre-wrap'}}, resources.study_plan_summary);
+      planContent = el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8,whiteSpace:'pre-wrap'}}, studyPlan);
     }
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, '学习路径'),
@@ -2341,11 +2343,12 @@ function renderChapter6(resources) {
   }
 
   // Knowledge points
-  if (resources.key_knowledge_points && resources.key_knowledge_points.length) {
+  const knowledgePoints = resources.key_knowledge_points || resources.key_points;
+  if (knowledgePoints && knowledgePoints.length) {
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, '重点知识要点'),
       el('div', {className:'kp-list'},
-        ...resources.key_knowledge_points.map(p => el('span',{className:'kp-item'}, p))
+        ...knowledgePoints.map(p => el('span',{className:'kp-item'}, p))
       )
     ));
   }

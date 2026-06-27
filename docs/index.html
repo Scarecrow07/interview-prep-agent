@@ -385,6 +385,17 @@ details[open] .qa-summary::before{content:'−'}
     </div>
   </details>
 
+  <details class="context-details" style="margin-bottom:12px">
+    <summary class="context-summary">🎯 岗位画像 / 靶心文档（可选，填写后方案更精准）</summary>
+    <div class="context-body">
+      <div class="context-field">
+        <label for="targetDoc">公司调研信息</label>
+        <textarea id="targetDoc" placeholder="可粘贴你对该公司的调研信息，例如：&#10;- 公司核心战略和近期动态&#10;- 产品痛点和竞争对手&#10;- 团队规模和岗位使命&#10;- 面经中提到的考察重点&#10;不填写则仅依赖 JD 自动分析。" style="min-height:100px;font-size:.82rem"></textarea>
+      </div>
+      <p style="font-size:.72rem;color:#94a3b8;margin-top:6px">💡 填写后，这些信息将注入后续所有章节的生成过程，帮助方案更贴合实际面试场景。</p>
+    </div>
+  </details>
+
   <button class="btn btn-primary" id="generateBtn" type="button" onclick="startGenerate()">
     🚀 生成面试准备方案
   </button>
@@ -401,12 +412,13 @@ details[open] .qa-summary::before{content:'−'}
     <div class="progress-steps">
       <div class="progress-step" id="step-precheck"><span class="step-icon">✓</span> 输入校验</div>
       <div class="progress-step" id="step-jd"><span class="step-icon">1</span> JD 分析</div>
-      <div class="progress-step" id="step-gap"><span class="step-icon">2</span> 匹配分析</div>
+      <div class="progress-step" id="step-gap"><span class="step-icon">2</span> 匹配诊断</div>
       <div class="progress-step" id="step-intro"><span class="step-icon">3</span> 自我介绍</div>
       <div class="progress-step" id="step-qa"><span class="step-icon">4</span> 面试问答</div>
       <div class="progress-step" id="step-coding"><span class="step-icon">5</span> 编码题</div>
-      <div class="progress-step" id="step-resource"><span class="step-icon">6</span> 学习资料</div>
-      <div class="progress-step" id="step-verify"><span class="step-icon">7</span> 准确性校验</div>
+      <div class="progress-step" id="step-resource"><span class="step-icon">6</span> 学习资源</div>
+      <div class="progress-step" id="step-mock"><span class="step-icon">7</span> 模拟自测</div>
+      <div class="progress-step" id="step-verify"><span class="step-icon">8</span> 六维校验</div>
       <div class="progress-step" id="step-render"><span class="step-icon">☆</span> 渲染报告</div>
     </div>
   </div>
@@ -432,86 +444,110 @@ details[open] .qa-summary::before{content:'−'}
 
 <!-- Chapter 1: JD Analysis -->
 <section>
-  <h2>一、JD 核心分析</h2>
+  <h2>一、深度侦察 — JD 核心分析与岗位画像</h2>
   <div id="chapter1"></div>
 </section>
 
-<!-- Chapter 2: Gap Analysis -->
+<!-- Chapter 2: Gap Analysis (expanded with STAR-L and risk cards) -->
 <section>
-  <h2>二、简历匹配分析</h2>
+  <h2>二、精准诊断 — 匹配度作战表与风险话术</h2>
   <div id="chapter2"></div>
 </section>
 
 <!-- Chapter 3: Self Intro -->
 <section>
-  <h2>三、自我介绍方案</h2>
+  <h2>三、内容生产 — 自我介绍方案</h2>
   <div id="chapter3"></div>
 </section>
 
 <!-- Chapter 4: Q&A -->
 <section>
-  <h2>四、面试问答题库</h2>
+  <h2>四、内容生产 — 面试问答题库</h2>
   <div id="chapter4"></div>
 </section>
 
 <!-- Chapter 5: Coding -->
 <section>
-  <h2>五、笔试编码题</h2>
+  <h2>五、内容生产 — 笔试编码题</h2>
   <div id="chapter5"></div>
 </section>
 
-<!-- Chapter 6: Resources -->
+<!-- Chapter 6: Resources (expanded with time-adaptive plan) -->
 <section>
-  <h2>六、学习资料推荐</h2>
+  <h2>六、时间自适应 — 学习资源与作战日程</h2>
   <div id="chapter6"></div>
+</section>
+
+<!-- Chapter 7: Mock interview self-test guide -->
+<section>
+  <h2>七、实战演练 — 模拟自测引导</h2>
+  <div id="chapter7"></div>
+</section>
+
+<!-- Chapter 8: Six-dimension verification -->
+<section>
+  <h2>八、校验优化 — 六维评分与反问清单</h2>
+  <div id="chapter8"></div>
 </section>
 </div>
 
-<div class="footer">AI 面试准备方案生成器 v0.1.0 | 所有输入仅在本地处理，不会保存或上传到任何服务器 | 基于 LLM 自动分析，仅供参考，不构成面试承诺</div>
+<div class="footer">AI 面试准备方案生成器 v0.2.0 | 所有输入仅在本地处理，不会保存或上传到任何服务器 | 基于 LLM 自动分析，仅供参考，不构成面试承诺</div>
 </div>
 
 <script>
 // ========== SYSTEM PROMPTS (from Python prompts/) ==========
 const PROMPTS = {
-  jd_analyzer: `你是一位资深的招聘分析师和职业顾问。你的任务是对给定的职位描述（JD）进行深入分析，提取结构化信息。
+  // ===== 1. jd_analyzer：JD 深度分析（保留原字段 + 新增 hidden_requirements）=====
+  jd_analyzer: `你是一位资深的招聘分析师和职业顾问。你的任务是对给定的职位描述（JD）进行深入分析，提取结构化信息，并洞察字里行间的隐含要求。
 
 请遵循以下原则：
 1. 客观准确：严格基于 JD 原文，不自行添加未提及的要求。
 2. 分类清晰：将技能区分为硬性技能（技术/专业）和软技能（沟通/协作等）。
 3. 级别判断：根据经验年限要求和职责描述准确判断岗位级别。
 4. 关键评价维度：从 JD 中提炼出面试官最可能用来评估候选人的维度。
+5. 隐含要求洞察：从职责描述的字里行间推断实际工作场景和隐含的技术能力要求（如 JD 写"负责高并发系统"则隐含需要掌握分布式架构、缓存、限流降级等）。
 
 输出为 JSON 对象，包含以下字段：
-- position_title: 岗位名称
-- company_industry: 公司行业（或 null）
-- summary: JD 核心摘要（100字以内）
-- core_responsibilities: 核心职责列表（3-8条）
-- hard_skills: 硬性技能数组，每项含 {tech_name, proficiency_level(了解/熟悉/精通/专家), is_required(boolean), reason_from_jd(引用依据)}
-- soft_skills: 软技能数组，每项含 {skill_name, context}
-- experience_requirement: {min_years(整数), preferred_industry(数组), preferred_role(字符串或null)}
-- education_requirement: 学历要求（或null）
-- role_level: 岗位级别（校招/初中级/高级/资深/专家/管理）
-- key_evaluation_criteria: 面试评价的关键维度（3-5条）
+- position_title: 岗位名称（字符串）
+- company_industry: 公司行业（字符串或 null）
+- summary: JD 核心摘要（字符串，100字以内）
+- core_responsibilities: 核心职责列表（字符串数组，3-8条）
+- hard_skills: 硬性技能数组，每项含 {tech_name(字符串), proficiency_level(字符串:了解/熟悉/精通/专家), is_required(boolean), reason_from_jd(字符串,引用依据)}
+- soft_skills: 软技能数组，每项含 {skill_name(字符串), context(字符串)}
+- experience_requirement: {min_years(整数), preferred_industry(字符串数组), preferred_role(字符串或null)}
+- education_requirement: 学历要求（字符串或 null）
+- role_level: 岗位级别（字符串:校招/初中级/高级/资深/专家/管理）
+- key_evaluation_criteria: 面试评价的关键维度（字符串数组，3-5条）
+- hidden_requirements: 从职责描述中推断的实际工作场景和隐含技术要求（对象数组），每项含 {inferred_requirement(字符串,推断出的隐含要求), inferred_from(字符串,JD中的推断依据), real_scenario(字符串,对应的实际工作场景说明), preparation_hint(字符串,针对此隐含要求的准备建议)}
 
-is_required: true=必备条件中明确列出, false=加分项中提到`,
+字段说明：is_required 为 true 表示必备条件中明确列出，false 表示加分项中提到。`,
 
-  gap_analyzer: `你是一位资深的招聘匹配分析师。你的任务是将候选人简历与 JD 分析结果进行逐项对比，找出匹配度和差距。
+  // ===== 2. gap_analyzer：精准诊断（扩展 skill_match_details + 新增 star_stories / risk_response_cards）=====
+  gap_analyzer: `你是一位资深的招聘匹配分析师。你的任务是将候选人简历与 JD 分析结果进行逐项对比，精准诊断匹配度与差距，并基于 STAR-L 法则深挖成就事件库，准备风险应对话术。
 
 请遵循以下原则：
 1. 给予客观的匹配评分（0-100），要基于实际证据。
-2. 匹配状态: matched(简历明确体现且水平相当或更高), partial(有相关经验但未完全达到), gap(明显缺乏), not_mentioned(未提及)
-3. 优先级的弥补优先级: 1=硬性要求有显著差距, 2=加分项或部分匹配, 3=影响较小
-4. 准备策略要个性化，结合具体差距给出可执行的准备方向。
+2. 匹配状态：matched(简历明确体现且水平相当或更高), partial(有相关经验但未完全达到), gap(明显缺乏), not_mentioned(未提及)
+3. 每个能力项判断权重(weight)与差距类型(gap_type)：
+   - weight: high=核心硬性要求, medium=重要加分项, low=边缘能力
+   - gap_type: hard_threshold=硬门槛差距(达不到会被直接淘汰), familiarity=熟悉度差距(能聊但不够深入), none=无差距
+4. 优先级 priority：1=硬性要求有显著差距, 2=加分项或部分匹配, 3=影响较小
+5. 针对每个差距给出具体可落地的应对话术方向(response_tactic)，1-2句话即可，必须可直接在面试中使用。
+6. STAR-L 成就事件库需深挖候选人简历中的真实经历，每项的 action 必须突出个人决策，result 必须量化。
+7. 风险应对卡覆盖6类常见风险，每种风险给出至少2种正面解释角度。
 
 输出为 JSON 对象，包含：
-- resume_summary: {years_of_experience(整数), current_role(字符串或null), education_background(字符串或null), notable_projects(最多5个)}
-- overall_match_score: 匹配度 0-100
-- skill_match_details: 数组，每项含 {skill_name, skill_type(tech/soft/domain), requirement_level, candidate_level(或null), match_status(matched/partial/gap/not_mentioned), evidence_from_resume(或null), gap_description(或null), priority(1-3)}
-- strengths: 核心优势（3-5条）
-- top_gaps: 最需弥补的差距（3-5条）
-- risk_areas: 高风险领域
-- preparation_strategy: 个性化准备策略建议（150-200字）`,
+- resume_summary: {years_of_experience(整数), current_role(字符串或null), education_background(字符串或null), notable_projects(字符串数组,最多5个)}
+- overall_match_score: 匹配度（整数，0-100）
+- skill_match_details: 数组，每项含 {skill_name(字符串), skill_type(字符串:tech/soft/domain), requirement_level(字符串), candidate_level(字符串或null), match_status(字符串:matched/partial/gap/not_mentioned), evidence_from_resume(字符串或null), gap_description(字符串或null), priority(整数1-3), weight(字符串:high/medium/low), gap_type(字符串:hard_threshold/familiarity/none), response_tactic(字符串,针对该差距的应对话术方向,1-2句可执行话术)}
+- strengths: 核心优势（字符串数组，3-5条）
+- top_gaps: 最需弥补的差距（字符串数组，3-5条）
+- risk_areas: 高风险领域（字符串数组）
+- preparation_strategy: 个性化准备策略建议（字符串，150-200字）
+- star_stories: 使用 STAR-L 法则深挖的成就事件库（对象数组，恰好5项），每项含 {title(字符串,事件标题), situation(字符串,50-80字,背景情境), task(字符串,30-50字,承担的任务), action(字符串,150-200字,突出个人决策与关键举措), result(字符串,量化结果,至少2个指标), learned(字符串,50-80字,方法论提炼与个人成长)}
+- risk_response_cards: 风险应对话术卡（对象数组，恰好6项，覆盖6类风险），每项含 {risk_type(字符串:career_gap/job_hopping/career_change/education_mismatch/insufficient_experience/salary_inversion), risk_description(字符串,该风险在候选人身上的具体表现), response_angles(字符串数组,至少2种正面解释角度), key_talking_points(字符串,核心话术要点)}`,
 
+  // ===== 3. self_intro：自我介绍（保持不变）=====
   self_intro: `你是一位面试辅导专家。你的任务是基于 JD 分析和差距分析结果，生成适合该候选人的自我介绍脚本。
 
 请遵循以下原则：
@@ -555,7 +591,8 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 
 注意：versions 数组必须包含3项，每项的 formal_script 和 casual_script 字段都不能为空。`,
 
-  qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库。
+  // ===== 4. qa_generator：问题回答库（扩展 star_guidance + 新增 question_categories_advice）=====
+  qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库，并对经历类问题提供 STAR-L 回答引导。
 
 请遵循以下原则：
 1. 题目覆盖以下维度：tech_deep_dive(技术深度), experience_probe(项目经历追问), behavioral(行为面试), scenario(情景题), hr(HR通用), motivation(动机匹配)
@@ -564,12 +601,16 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 4. 对 gap 领域生成针对性问题
 5. 标注考察维度
 6. 每道题必须附带 2-3 层递进式追问链（follow_up_chain），模拟真实面试官的深挖节奏
+7. 对经历类问题（experience_probe/behavioral/scenario）必须给出 STAR-L 回答引导，帮助候选人结构化组织答案；对非经历类问题 star_guidance 为 null
+8. 按四类（专业能力/项目故事/行为情景/压力短板）给出分类准备建议
 
 输出为 JSON，包含：
 - total_questions: 整数
-- questions: 数组，每项含 {question_number, category, difficulty(easy/medium/hard), question_text, evaluation_dimension, answer_framework(或null), reference_answer_key_points(数组), suggested_time_limit, follow_up_chain(数组，每项含{layer:1-3, follow_up_question, expected_direction:期望候选人回答的方向, red_flag:该层回答不佳的危险信号}), follow_up_hints(数组或null)}
-- focus_areas_advice: 面试准备重点领域建议`,
+- questions: 数组，每项含 {question_number(整数), category(字符串), difficulty(字符串:easy/medium/hard), question_text(字符串), evaluation_dimension(字符串), answer_framework(字符串或null), reference_answer_key_points(字符串数组), suggested_time_limit(字符串), follow_up_chain(对象数组,每项含{layer(整数1-3), follow_up_question(字符串), expected_direction(字符串,期望候选人回答的方向), red_flag(字符串,该层回答不佳的危险信号)}), follow_up_hints(字符串数组或null), star_guidance(对象或null:对经历类问题给出STAR-L引导,含{situation_hint(字符串,情境描述提示), task_hint(字符串,任务说明提示), action_hint(字符串,行动举措提示,突出个人决策), result_hint(字符串,结果量化提示), learned_hint(字符串,方法论提炼提示)};对非经历类问题为null)}
+- focus_areas_advice: 面试准备重点领域建议（字符串数组）
+- question_categories_advice: 按四类分类的准备建议（对象数组，恰好4项），每项含 {category(字符串:professional_skill/project_story/behavioral_scenario/stress_weakness), category_name(字符串:专业能力/项目故事/行为情景/压力短板), preparation_strategy(字符串,该类问题的准备策略), key_focus_points(字符串数组,该类问题的重点关注点), common_pitfalls(字符串数组,常见陷阱)}`,
 
+  // ===== 5. coding_agent：编码出题（保持不变）=====
   coding_agent: `你是一位技术面试的出题专家。你的任务是基于 JD 要求的技术栈和候选人简历中的编程能力，生成适合面试的编码题目。
 
 请遵循以下原则：
@@ -584,12 +625,13 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 
 输出为 JSON，包含：
 - total_problems: 整数
-- language_recommendation: 推荐编程语言
-- difficulty_distribution: 难度分布说明
-- problems: 数组，每项含 {problem_number, title, difficulty(easy/medium/hard), estimated_time, topic_tags(数组), problem_description, examples(数组[{input,output}]), constraints(数组), hints(数组), solution_approach, reference_code_language, reference_code_snippet, complexity_analysis, related_leetcode_problems(数组或null)}
-- preparation_tips: 备考贴士`,
+- language_recommendation: 推荐编程语言（字符串）
+- difficulty_distribution: 难度分布说明（字符串）
+- problems: 数组，每项含 {problem_number(整数), title(字符串), difficulty(字符串:easy/medium/hard), estimated_time(字符串), topic_tags(字符串数组), problem_description(字符串), examples(对象数组,每项含{input(字符串),output(字符串)}), constraints(字符串数组), hints(字符串数组), solution_approach(字符串), reference_code_language(字符串), reference_code_snippet(字符串), complexity_analysis(字符串), related_leetcode_problems(字符串数组或null)}
+- preparation_tips: 备考贴士（字符串数组）`,
 
-  resource_agent: `你是一位职业学习规划师。你的任务是基于差距分析结果，推荐针对性的学习资源。
+  // ===== 6. resource_agent：时间自适应学习策略（保留原字段 + 新增 time_adaptive_plan / mock_interview_guide）=====
+  resource_agent: `你是一位职业学习规划师。你的任务是基于差距分析结果，推荐针对性的学习资源，并生成时间自适应学习计划与模拟面试自测引导。
 
 请遵循以下原则：
 1. 推荐直接对应差距分析中识别出的短板
@@ -597,28 +639,47 @@ is_required: true=必备条件中明确列出, false=加分项中提到`,
 3. 优先级：high(对应priority=1), medium(对应priority=2), low(加分项)
 4. 给出3-5天的学习路径
 5. 额外生成一份「面试前24小时速成方案」，聚焦最关键的 2-3 个知识点，每项给出 1-3 小时的具体速成任务
+6. 时间自适应计划提供3个档位（1天/3天/7天），每档任务颗粒度不同：1天聚焦最核心2-3项，3天覆盖核心短板+1项延伸，7天系统化覆盖所有差距
+7. 模拟面试自测引导包含自测脚本、复盘检查清单和回溯触发条件
 
 输出为 JSON，包含：
-- resources: 数组，每项含 {resource_type, title, target_skill, reason, url_or_reference(或null), estimated_time_required(或null), priority(high/medium/low), difficulty_level(beginner/intermediate/advanced)}
-- study_plan_summary: 3-5天学习路径，每个阶段单独一行，用换行符分隔
-- crash_plan_24h: 数组，每项含 {time_slot: 时段(如"第1-2小时"), focus_skill: 聚焦技能, task: 具体任务, key_points: 核心要点数组, expected_outcome: 预期效果}
-- key_knowledge_points: 重点知识要点数组`,
+- resources: 数组，每项含 {resource_type(字符串), title(字符串), target_skill(字符串), reason(字符串), url_or_reference(字符串或null), estimated_time_required(字符串或null), priority(字符串:high/medium/low), difficulty_level(字符串:beginner/intermediate/advanced)}
+- study_plan_summary: 3-5天学习路径（字符串，每个阶段单独一行，用换行符分隔）
+- crash_plan_24h: 数组，每项含 {time_slot(字符串,时段如"第1-2小时"), focus_skill(字符串), task(字符串), key_points(字符串数组), expected_outcome(字符串)}
+- key_knowledge_points: 重点知识要点（字符串数组）
+- time_adaptive_plan: 时间自适应学习计划（对象），包含：
+  - plan_1day: 1天速成计划（对象数组），每项含 {time_slot(字符串,时段), task(字符串,具体任务), focus_skill(字符串,聚焦技能), expected_outcome(字符串,预期效果)}
+  - plan_3day: 3天冲刺计划（对象数组，同上结构）
+  - plan_7day: 7天系统计划（对象数组，同上结构）
+- mock_interview_guide: 模拟面试自测引导（对象），包含：
+  - self_test_script: 自测脚本（字符串数组，每项为一个自测问题或场景描述）
+  - review_checklist: 复盘检查清单（字符串数组，每项为一个复盘检查点）
+  - rollback_triggers: 回溯触发条件（字符串数组，每项为需要回溯重练的触发条件）`,
 
-  verify_agent: `你是一位面试准备方案的质量审核专家。你的任务是校验已生成的面试准备方案的准确性和一致性。
+  // ===== 7. verify_agent：六维评分表（完全重写）=====
+  verify_agent: `你是一位面试准备方案的质量审核专家。你的任务是对已生成的面试准备方案进行六维评分，并提供分轮次反问清单与薪资谈判准备建议。
 
-请检查以下维度：
-1. 一致性：自我介绍中提到的亮点是否与匹配分析的优势一致
-2. 覆盖性：面试问题是否覆盖了 JD 中的核心技能和差距领域
-3. 准确性：编码题难度是否与匹配度等级匹配
-4. 完整性：学习资料是否覆盖了所有已识别的差距
-5. 针对性：各模块内容是否针对该候选人的具体情况
+请按以下六维评分模型进行评估（维度顺序与权重固定）：
+1. 专业技能匹配度（权重25%）：候选人技术栈与 JD 硬性要求的匹配程度
+2. 项目经验深度（权重20%）：项目经历的深度、复杂度与 JD 职责的契合度
+3. 沟通表达与逻辑（权重15%）：自我介绍、话术、答案的逻辑性与表达力
+4. 问题解决与工程素养（权重15%）：编码题、情景题展现的工程思维与问题拆解能力
+5. 文化契合度（权重15%）：与公司价值观、团队风格的匹配程度
+6. 潜力与动机（权重10%）：学习意愿、职业规划的清晰度与岗位动机
+
+评分原则：
+1. self_score 采用 1-5 分制（1=严重不足, 2=较弱, 3=达标, 4=良好, 5=优秀）
+2. overall_quality_score 按 six_dimension_scores 的 self_score 与 weight 加权换算到 0-100
+3. 每个维度必须指出具体问题(issues)和优化方向(optimization)
+4. 反问清单分3轮（HR面/技术面/高管面），每轮3-5个展现深度思考的问题
+5. 薪资谈判准备包含市场区间估算、谈判策略和禁忌事项
 
 输出为 JSON，包含：
-- overall_quality_score: 整体质量评分 (0-100)
-- consistency_checks: 数组，每项含 {check_item: 检查项, status: pass/warning/fail, detail: 说明}
-- identified_issues: 数组，发现的问题列表（每项为字符串）
-- improvement_suggestions: 数组，改进建议
-- final_verdict: 最终结论 (ready/needs_attention/needs_revision)`
+- overall_quality_score: 整体质量评分（整数，0-100，按六维加权计算）
+- six_dimension_scores: 六维评分数组（恰好6项，顺序固定），每项含 {dimension(字符串:专业技能匹配度/项目经验深度/沟通表达与逻辑/问题解决与工程素养/文化契合度/潜力与动机), weight(字符串:25%/20%/15%/15%/15%/10%), self_score(整数1-5), issues(字符串数组,该维度存在的具体问题), optimization(字符串,该维度的优化建议)}
+- smart_questions: 分轮次反问清单（对象数组，恰好3项），每项含 {round(字符串:hr/technical/executive,对应HR面/技术面/高管面), questions(字符串数组,每轮3-5个展现深度思考的问题)}
+- salary_negotiation_prep: 薪资谈判准备（对象），包含 {market_range_estimate(字符串,基于岗位和经验的市场薪资区间估算), negotiation_tactics(字符串数组,谈判策略,至少3条), taboos(字符串数组,谈判禁忌,至少3条)}
+- final_verdict: 最终结论（字符串:ready/needs_attention/needs_revision）`
 };
 
 // ========== PROVIDER CONFIG ==========
@@ -1096,7 +1157,8 @@ async function startGenerate() {
     companyName: document.getElementById('companyName')?.value.trim() || '',
     interviewRound: document.getElementById('interviewRound')?.value || '',
     interviewFormat: document.getElementById('interviewFormat')?.value || '',
-    hrNotes: document.getElementById('hrNotes')?.value.trim() || ''
+    hrNotes: document.getElementById('hrNotes')?.value.trim() || '',
+    targetDoc: document.getElementById('targetDoc')?.value.trim() || ''
   };
 
   // Validation
@@ -1115,7 +1177,7 @@ async function startGenerate() {
   document.getElementById('reportTime').textContent = new Date().toLocaleString('zh-CN');
   document.getElementById('reportCandidate').textContent = candidateName;
 
-  const steps = ['step-precheck','step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-verify','step-render'];
+  const steps = ['step-precheck','step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-mock','step-verify','step-render'];
   steps.forEach(s => setStep(s, 'pending'));
 
   let results = {};
@@ -1128,8 +1190,8 @@ async function startGenerate() {
     // Step 1: JD Analysis
     setStep('step-jd', 'running');
     setProgress(15, '正在分析 JD...');
-    const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.hrNotes)
-      ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.hrNotes?('HR沟通情况：'+interviewContext.hrNotes):''].filter(Boolean).join('\n')}` : '';
+    const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.hrNotes || interviewContext.targetDoc)
+      ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.hrNotes?('HR沟通情况：'+interviewContext.hrNotes):'',interviewContext.targetDoc?('岗位画像/靶心文档：\n'+interviewContext.targetDoc):''].filter(Boolean).join('\n')}` : '';
     const jdResult = await callOpenAIWithRetry(PROMPTS.jd_analyzer,
       `请分析以下职位描述（JD）：\n\n${jdText}${phase1Context}`
     );
@@ -1266,12 +1328,16 @@ async function continueGenerate() {
     );
     results.resources = resourceResult;
     setStep('step-resource', 'done');
-    setProgress(80, '结果准确性校验...');
+    setProgress(75, '生成模拟自测引导...');
 
-    // Step 7: Consistency verification
+    // Step 7: Mock interview guide (extracted from resources)
+    setStep('step-mock', 'done'); // mock_interview_guide is part of resource_agent output
+    setProgress(80, '六维校验评估...');
+
+    // Step 8: Six-dimension verification
     setStep('step-verify', 'running');
     const verifyResult = await callOpenAIWithRetry(PROMPTS.verify_agent,
-      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n${contextExtra}\n\n请校验以上面试准备方案的准确性和一致性。`
+      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n核心优势: ${(gapResult.strengths||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n\n【STAR-L故事数】${(gapResult.star_stories||[]).length}\n【风险话术卡数】${(gapResult.risk_response_cards||[]).length}\n${contextExtra}\n\n请以面试官视角对以上面试准备方案进行六维度评分，并生成分轮次反问清单和薪资谈判准备。`
     );
     results.verify = verifyResult;
     setStep('step-verify', 'done');
@@ -1291,7 +1357,7 @@ async function continueGenerate() {
       ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
       : (err.message || '生成过程中发生错误');
     showError(msg);
-    const currentStep = ['step-intro','step-qa','step-coding','step-resource','step-verify','step-render']
+    const currentStep = ['step-intro','step-qa','step-coding','step-resource','step-mock','step-verify','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
   }
@@ -1398,8 +1464,9 @@ function renderReport(results, candidateName) {
   renderChapter4(qa);
   renderChapter5(coding);
   renderChapter6(resources);
+  renderChapter7(resources);
+  renderChapter8(verify);
   renderMockGuide(qa, intro, gap);
-  renderVerifySection(verify);
 }
 
 // ========== Render verification section ==========
@@ -1799,31 +1866,50 @@ function renderChapter2(gap) {
   );
   container.append(summaryCard);
 
-  // Match details table (support both new and old field names)
+  // Match details table (support both new and old field names, with expanded columns)
   const matchDetails = gap.skill_match_details || gap.skill_matches || [];
   if (matchDetails.length) {
+    const weightLabels = {high:'高', medium:'中', low:'低'};
+    const weightColors = {high:'tag-red', medium:'tag-orange', low:'tag-gray'};
+    const gapTypeLabels = {hard_threshold:'硬门槛', familiarity:'熟悉度', none:'无'};
     const rows = matchDetails.map(s => {
       const statusLabel = {matched:'匹配', partial:'部分匹配', gap:'差距', not_mentioned:'未提及'}[s.match_status || s.status] || s.match_status || s.status || '';
       return el('tr', null,
         el('td', {style:{fontWeight:600}}, s.skill_name || s.skill || ''),
         el('td', null, el('span',{className:'tag tag-gray'}, s.skill_type==='tech'?'技术':s.skill_type==='soft'?'软技能':'领域')),
+        el('td', null, s.weight ? el('span',{className:'tag '+(weightColors[s.weight]||'tag-gray')}, weightLabels[s.weight]||s.weight) : ''),
         el('td', null, s.requirement_level || s.proficiency_level || ''),
         el('td', null, s.candidate_level || '-'),
         el('td', null,
           el('span',{className:'status-dot '+(s.match_status || s.status || '')}),
           statusLabel
         ),
+        el('td', null, s.gap_type ? el('span',{className:'tag '+(s.gap_type==='hard_threshold'?'tag-red':s.gap_type==='familiarity'?'tag-orange':'tag-green')}, gapTypeLabels[s.gap_type]||s.gap_type) : ''),
         el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, s.gap_description || s.detail || '')
       );
     });
+    const headers = ['技能','类型','权重','要求','候选水平','匹配状态','差距类型','差距描述'];
     const card = el('div', {className:'card'},
-      el('div', {className:'card-title'}, '技能匹配详情'),
+      el('div', {className:'card-title'}, '匹配度作战表'),
       el('div', {className:'table-wrap'},
         el('table', null,
-          el('thead', null, el('tr', null, ['技能','类型','要求','候选水平','匹配状态','差距描述'].map(h => el('th', null, h)))),
+          el('thead', null, el('tr', null, ...headers.map(h => el('th', null, h)))),
           el('tbody', null, ...rows)
         )
       )
+    );
+    container.append(card);
+  }
+
+  // Response tactics for gaps
+  const gapItems = matchDetails.filter(s => (s.match_status || s.status) !== 'matched' && s.response_tactic);
+  if (gapItems.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '差距应对话术'),
+      ...gapItems.map(s => el('div', {style:{marginBottom:'10px',padding:'10px',background:'var(--c-bg)',borderRadius:'6px',borderLeft:'4px solid #f59e0b'}},
+        el('div', {style:{fontWeight:600,fontSize:'.85rem',marginBottom:'4px'}}, s.skill_name || s.skill),
+        el('div', {style:{fontSize:'.82rem',color:'#475569',lineHeight:1.6}}, s.response_tactic)
+      ))
     );
     container.append(card);
   }
@@ -1853,6 +1939,45 @@ function renderChapter2(gap) {
       el('p', {style:{fontSize:'.9rem',color:'#475569',lineHeight:1.8}}, gap.preparation_strategy)
     );
     container.append(card);
+  }
+
+  // STAR-L stories
+  if (gap.star_stories && gap.star_stories.length) {
+    const storyCards = gap.star_stories.map((story, i) =>
+      el('details', {style:{marginBottom:'8px',border:'1px solid var(--c-border)',borderRadius:'6px',overflow:'hidden'}},
+        el('summary', {style:{padding:'10px 14px',fontWeight:600,fontSize:'.85rem',cursor:'pointer',background:'var(--c-bg)'}}, 'Story ' + (i+1) + ': ' + (story.title || '未命名')),
+        el('div', {style:{padding:'12px 14px',fontSize:'.82rem',lineHeight:1.7}},
+          story.situation ? el('div', {style:{marginBottom:'6px'}}, el('strong', {style:{color:'#3b82f6'}}, 'S 情景：'), story.situation) : null,
+          story.task ? el('div', {style:{marginBottom:'6px'}}, el('strong', {style:{color:'#3b82f6'}}, 'T 任务：'), story.task) : null,
+          story.action ? el('div', {style:{marginBottom:'6px'}}, el('strong', {style:{color:'#3b82f6'}}, 'A 行动：'), story.action) : null,
+          story.result ? el('div', {style:{marginBottom:'6px'}}, el('strong', {style:{color:'#27ae60'}}, 'R 结果：'), story.result) : null,
+          story.learned ? el('div', null, el('strong', {style:{color:'#f59e0b'}}, 'L 复盘：'), story.learned) : null
+        )
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, 'STAR-L 成就事件库'),
+      el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginBottom:'10px'}}, '点击展开每个故事的完整 STAR-L 叙事'),
+      ...storyCards
+    ));
+  }
+
+  // Risk response cards
+  if (gap.risk_response_cards && gap.risk_response_cards.length) {
+    const riskCards = gap.risk_response_cards.map(risk =>
+      el('div', {style:{marginBottom:'10px',padding:'12px',border:'1px solid #fecaca',borderRadius:'6px',background:'#fef2f2'}},
+        el('div', {style:{fontWeight:700,fontSize:'.85rem',color:'#dc2626',marginBottom:'6px'}}, '⚠ ' + (risk.risk_type || '风险') + (risk.risk_description ? '：' + risk.risk_description : '')),
+        risk.response_angles && risk.response_angles.length ? el('div', {style:{marginBottom:'6px'}},
+          el('strong', {style:{fontSize:'.8rem'}}, '正面解释角度：'),
+          el('ul', {style:{fontSize:'.8rem',color:'#475569',paddingLeft:'18px',marginTop:'4px'}}, ...risk.response_angles.map(a => el('li', {style:{marginBottom:'3px'}}, a)))
+        ) : null,
+        risk.key_talking_points ? el('div', {style:{fontSize:'.8rem',color:'#475569'}}, el('strong', null, '关键话术：'), risk.key_talking_points) : null
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, el('span',{style:{color:'#dc2626'}},'⚠'), ' 风险应对话术卡'),
+      ...riskCards
+    ));
   }
 }
 
@@ -2088,11 +2213,11 @@ function renderChapter5(coding) {
     return;
   }
 
-  coding.problems.forEach(p => {
+  coding.problems.forEach((p, i) => {
     const diffTag = p.difficulty === 'easy' ? 'tag-green' : p.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
     const card = el('div', {className:'card'},
       el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',marginBottom:'8px'}},
-        el('span', {style:{fontWeight:700,fontSize:'1rem'}}, '#'+p.problem_number+' '+p.title),
+        el('span', {style:{fontWeight:700,fontSize:'1rem'}}, '#'+(p.problem_number || (i+1))+' '+p.title),
         el('div', null,
           el('span',{className:'tag '+diffTag}, p.difficulty),
           ' ',
@@ -2104,11 +2229,11 @@ function renderChapter5(coding) {
       ) : null,
       el('p', {style:{fontSize:'.88rem',color:'#475569',marginBottom:'8px'}}, p.problem_description),
 
-      p.examples?.length ? el('div', null,
+      p.examples ? el('div', null,
         el('strong', {style:{fontSize:'.82rem'}}, '输入输出示例：'),
-        ...p.examples.map((ex,i) => el('div', {style:{fontSize:'.82rem',background:'#f1f5f9',padding:'6px 10px',borderRadius:'4px',margin:'4px 0',fontFamily:'monospace'}},
-          '输入: '+ex.input+'  →  输出: '+ex.output
-        ))
+        ...(Array.isArray(p.examples) ? p.examples.map((ex,i) => el('div', {style:{fontSize:'.82rem',background:'#f1f5f9',padding:'6px 10px',borderRadius:'4px',margin:'4px 0',fontFamily:'monospace'}},
+          '输入: '+(ex.input||'')+'  →  输出: '+(ex.output||'')
+        )) : [el('div', {style:{fontSize:'.82rem',background:'#f1f5f9',padding:'6px 10px',borderRadius:'4px',margin:'4px 0',fontFamily:'monospace'}}, p.examples)])
       ) : null,
 
       p.hints?.length ? el('div', {style:{fontSize:'.82rem',color:'#64748b',marginTop:'6px'}},
@@ -2223,6 +2348,160 @@ function renderChapter6(resources) {
         ...resources.key_knowledge_points.map(p => el('span',{className:'kp-item'}, p))
       )
     ));
+  }
+}
+
+// ========== Chapter 7: Mock interview self-test guide ==========
+function renderChapter7(resources) {
+  const container = document.getElementById('chapter7');
+  container.innerHTML = '';
+  const mock = resources?.mock_interview_guide;
+  if (!mock) {
+    container.append(el('div', {className:'none-notice'}, '模拟自测引导暂未生成'));
+    return;
+  }
+
+  // Self-test script
+  if (mock.self_test_script && mock.self_test_script.length) {
+    const scriptItems = mock.self_test_script.map((s, i) =>
+      el('div', {style:{marginBottom:'10px',padding:'12px',background:'var(--c-bg)',borderRadius:'6px',borderLeft:'4px solid #3498db'}},
+        el('div', {style:{fontWeight:600,fontSize:'.85rem',marginBottom:'4px'}}, '自测 ' + (i+1) + ': ' + (s.question || s.task || '')),
+        el('div', {style:{fontSize:'.8rem',color:'#64748b'}}, s.guidance || s.expected_outcome || '')
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '结构化自测脚本'),
+      el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginBottom:'10px'}}, '请对着手机录音回答以下问题，然后回放对照参考答案自查'),
+      ...scriptItems
+    ));
+  }
+
+  // Review checklist
+  if (mock.review_checklist && mock.review_checklist.length) {
+    const checkItems = mock.review_checklist.map(c =>
+      el('div', {style:{display:'flex',alignItems:'flex-start',gap:'8px',marginBottom:'6px',fontSize:'.82rem'}},
+        el('span', {style:{color:'#f59e0b',fontWeight:700,flexShrink:0}}, '☐'),
+        el('span', null, c)
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '复盘自查评分表'),
+      ...checkItems
+    ));
+  }
+
+  // Rollback triggers
+  if (mock.rollback_triggers && mock.rollback_triggers.length) {
+    const triggerItems = mock.rollback_triggers.map(t =>
+      el('li', {style:{fontSize:'.8rem',color:'#dc2626',marginBottom:'4px'}}, t)
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, el('span',{style:{color:'#f59e0b'}},'↩'), ' 回溯触发条件'),
+      el('p', {style:{fontSize:'.78rem',color:'#94a3b8',marginBottom:'6px'}}, '当以下情况发生时，需回溯补充内容'),
+      el('ul', {style:{paddingLeft:'18px'}}, ...triggerItems)
+    ));
+  }
+}
+
+// ========== Chapter 8: Six-dimension verification ==========
+function renderChapter8(verify) {
+  const container = document.getElementById('chapter8');
+  container.innerHTML = '';
+  if (!verify) {
+    container.append(el('div', {className:'none-notice'}, '校验结果暂未生成'));
+    return;
+  }
+
+  const scoreColor = (verify.overall_quality_score || 0) >= 80 ? '#22c55e' : (verify.overall_quality_score || 0) >= 60 ? '#f59e0b' : '#ef4444';
+  const verdictLabels = { ready: '✅ 方案就绪', needs_attention: '⚠️ 需关注', needs_revision: '❌ 建议修改' };
+  const verdictColors = { ready: '#22c55e', needs_attention: '#f59e0b', needs_revision: '#ef4444' };
+  const verdict = verify.final_verdict || 'needs_attention';
+
+  // Score card
+  container.append(el('div', {className:'card', style:{borderTop:'4px solid '+(verdictColors[verdict]||'#64748b')}},
+    el('div', {className:'card-title'}, '🔍 整体质量评估'),
+    el('div', {style:{display:'flex',alignItems:'center',gap:'16px',marginBottom:'14px'}},
+      el('div', {style:{textAlign:'center'}},
+        el('div', {style:{fontSize:'2rem',fontWeight:800,color:scoreColor}}, String(verify.overall_quality_score || '--')),
+        el('div', {style:{fontSize:'.72rem',color:'#94a3b8'}}, '整体质量评分')
+      ),
+      el('div', {style:{padding:'6px 14px',borderRadius:'6px',background:verdictColors[verdict]||'#64748b',color:'#fff',fontSize:'.82rem',fontWeight:600}},
+        verdictLabels[verdict] || verdict)
+    )
+  ));
+
+  // Six-dimension scores
+  if (verify.six_dimension_scores && verify.six_dimension_scores.length) {
+    const dimRows = verify.six_dimension_scores.map(d => {
+      const score = d.self_score || 0;
+      const scoreColor = score >= 4 ? '#22c55e' : score >= 3 ? '#f59e0b' : '#ef4444';
+      return el('tr', null,
+        el('td', {style:{fontWeight:600}}, d.dimension || ''),
+        el('td', null, d.weight || ''),
+        el('td', null, el('span', {style:{color:scoreColor,fontWeight:700}}, String(score) + '/5')),
+        el('td', {style:{fontSize:'.8rem',color:'#64748b'}}, d.issues || ''),
+        el('td', {style:{fontSize:'.8rem',color:'#3b82f6'}}, d.optimization || '')
+      );
+    });
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '六维评分表'),
+      el('div', {className:'table-wrap'},
+        el('table', null,
+          el('thead', null, el('tr', null,
+            ...['评估维度','权重','自评','存在问题','优化手段'].map(h => el('th', null, h))
+          )),
+          el('tbody', null, ...dimRows)
+        )
+      )
+    ));
+  }
+
+  // Smart questions by round
+  if (verify.smart_questions && verify.smart_questions.length) {
+    const roundLabels = {hr面:'HR面', 技术面:'技术面', 高管面:'高管面'};
+    const roundColors = {hr面:'#3b82f6', 技术面:'#27ae60', 高管面:'#f59e0b'};
+    const questionCards = verify.smart_questions.map(rq =>
+      el('div', {style:{marginBottom:'10px',padding:'12px',borderLeft:'4px solid '+(roundColors[rq.round]||'#64748b'),background:'var(--c-bg)',borderRadius:'6px'}},
+        el('div', {style:{fontWeight:700,fontSize:'.85rem',marginBottom:'8px',color:roundColors[rq.round]||'#64748b'}}, roundLabels[rq.round] || rq.round),
+        el('ul', {style:{paddingLeft:'18px',fontSize:'.82rem',color:'#475569',lineHeight:1.7}},
+          ...(rq.questions || []).map(q => el('li', {style:{marginBottom:'4px'}}, q))
+        )
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '💡 分轮次深度反问清单'),
+      ...questionCards
+    ));
+  }
+
+  // Salary negotiation prep
+  if (verify.salary_negotiation_prep) {
+    const snp = verify.salary_negotiation_prep;
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '💰 薪资谈判准备')
+    );
+    if (snp.market_range_estimate) {
+      card.append(el('div', {style:{marginBottom:'8px',fontSize:'.85rem'}},
+        el('strong', null, '市场薪资范围：'), snp.market_range_estimate
+      ));
+    }
+    if (snp.negotiation_tactics && snp.negotiation_tactics.length) {
+      card.append(el('div', {style:{marginBottom:'8px'}},
+        el('strong', {style:{fontSize:'.82rem'}}, '谈判策略：'),
+        el('ul', {style:{fontSize:'.8rem',color:'#475569',paddingLeft:'18px',marginTop:'4px'}},
+          ...snp.negotiation_tactics.map(t => el('li', {style:{marginBottom:'3px'}}, t))
+        )
+      ));
+    }
+    if (snp.taboos && snp.taboos.length) {
+      card.append(el('div', null,
+        el('strong', {style:{fontSize:'.82rem',color:'#dc2626'}}, '注意事项：'),
+        el('ul', {style:{fontSize:'.8rem',color:'#dc2626',paddingLeft:'18px',marginTop:'4px'}},
+          ...snp.taboos.map(t => el('li', {style:{marginBottom:'3px'}}, t))
+        )
+      ));
+    }
+    container.append(card);
   }
 }
 </script>

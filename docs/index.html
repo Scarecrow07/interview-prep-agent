@@ -1538,17 +1538,17 @@ function resetBtn() {
 
 // ========== RENDER FUNCTIONS ==========
 function renderReport(results, candidateName) {
-  const { jd, gap, intro, qa, coding, resources, verify } = results;
+  const { jd, resume, gap, intro, project, qa, coding, resources } = results;
 
+  // 使用正确的渲染函数
   renderChapter1(jd);
-  renderChapter2(gap);
-  renderChapter3(intro);
-  renderChapter4(qa);
-  renderChapter5(coding);
-  renderChapter6(resources);
-  renderChapter7(resources);
-  renderChapter8(verify);
-  renderMockGuide(qa, intro, gap);
+  renderChapter2Resume(resume);
+  renderChapter3Gap(gap);
+  renderChapter4Intro(intro);
+  renderChapter5Project(project);
+  renderChapter6QA(qa);
+  renderChapter7Coding(coding);
+  renderChapter8Resources(resources);
 }
 
 // ========== Render verification section ==========
@@ -2792,8 +2792,66 @@ function renderChapter6QA(qa) {
   qa.questions.forEach((q, idx) => {
     const diffTag = q.difficulty === 'easy' ? 'tag-green' : q.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
     const catLabel = catLabels[q.category] || q.category;
+    const af = q.answer_framework || {};
     
-    const qCard = el('div', {className:'card', style:{marginBottom:'12px'}},
+    // 构建完整的答案卡片
+    const answerParts = [];
+    
+    // 考察意图
+    if (af.intent) {
+      answerParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '🎯 考察意图：'),
+        el('p', {style:{fontSize:'.85rem',color:'#334155'}}, af.intent)
+      ));
+    }
+    
+    // 回答结构
+    if (af.structure) {
+      answerParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '📐 回答结构：'),
+        el('p', {style:{fontSize:'.85rem',color:'#334155'}}, af.structure)
+      ));
+    }
+    
+    // 高分要点
+    if (af.key_points && af.key_points.length) {
+      answerParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '✅ 高分要点：'),
+        el('ul', {style:{fontSize:'.85rem',color:'#334155'}}, ...af.key_points.map(p => el('li', null, p)))
+      ));
+    }
+    
+    // 需避开的雷区
+    if (af.pitfalls && af.pitfalls.length) {
+      answerParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#ef4444',fontWeight:600}}, '❌ 需避开的雷区：'),
+        el('ul', {style:{fontSize:'.85rem',color:'#334155'}}, ...af.pitfalls.map(p => el('li', {style:{color:'#ef4444'}}, p)))
+      ));
+    }
+    
+    // 示例回答（最重要）
+    if (af.sample_response) {
+      answerParts.push(el('div', {style:{marginBottom:'8px',background:'#f0fdf4',padding:'12px',borderRadius:'6px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#22c55e',fontWeight:600}}, '📝 示例回答（可直接开口讲）：'),
+        el('p', {style:{fontSize:'.85rem',color:'#334155',whiteSpace:'pre-wrap'}}, af.sample_response)
+      ));
+    }
+    
+    // 来源追溯
+    if (q.source_reference) {
+      const sr = q.source_reference;
+      const refParts = [];
+      if (sr.jd_requirement) refParts.push('JD: ' + sr.jd_requirement);
+      if (sr.resume_section) refParts.push('简历: ' + sr.resume_section);
+      if (sr.gap_source) refParts.push('差距: ' + sr.gap_source);
+      if (refParts.length) {
+        answerParts.push(el('div', {style:{marginBottom:'8px',fontSize:'.8rem',color:'#94a3b8'}},
+          el('span', null, '📌 来源：' + refParts.join(' | '))
+        ));
+      }
+    }
+    
+    const qCard = el('div', {className:'card', style:{marginBottom:'16px'}},
       el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}},
         el('span', {style:{fontWeight:600}}, `Q${idx+1}: ${q.question_text || q.question || ''}`),
         el('div', null,
@@ -2801,13 +2859,17 @@ function renderChapter6QA(qa) {
           el('span',{className:'tag tag-blue'}, catLabel)
         )
       ),
-      q.answer_framework ? el('div', {style:{fontSize:'.85rem',color:'#475569'}},
-        el('p', {style:{fontWeight:600}}, '回答要点：'),
-        el('ul', null, ...(q.answer_framework?.key_points || []).map(p => el('li', null, p)))
-      ) : null
+      ...answerParts
     );
     container.append(qCard);
   });
+  
+  // 约束说明
+  if (qa.constraint_note) {
+    container.append(el('div', {className:'card', style:{background:'#fef3c7'}},
+      el('p', {style:{fontSize:'.85rem'}}, '⚠️ ' + qa.constraint_note)
+    ));
+  }
 }
 
 // Step 7: 笔试题目 - 使用现有 renderChapter5 的逻辑
@@ -2821,28 +2883,140 @@ function renderChapter7Coding(coding) {
   
   container.append(el('div', {className:'qa-category-stats'},
     el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+coding.total_problems+' 题'),
-    coding.language_recommendation ? el('span',{className:'stat-item'}, '推荐语言: '+coding.language_recommendation) : null
+    coding.language_recommendation ? el('span',{className:'stat-item'}, '推荐语言: '+coding.language_recommendation) : null,
+    coding.time_estimate_minutes ? el('span',{className:'stat-item'}, '预估时间: '+coding.time_estimate_minutes+'分钟') : null
   ));
+  
+  // LeetCode练习建议
+  if (coding.leetcode_practice_summary) {
+    const lps = coding.leetcode_practice_summary;
+    const lcCard = el('div', {className:'card', style:{marginBottom:'16px',background:'#eff6ff'}},
+      el('div', {className:'card-title'}, '📚 LeetCode练习建议'),
+      lps.recommended_problems && lps.recommended_problems.length ? el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b'}}, '推荐题目：'),
+        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'8px'}},
+          ...lps.recommended_problems.map(lp => 
+            el('a', {href:lp.practice_link, target:'_blank', style:{fontSize:'.8rem',color:'#3b82f6',textDecoration:'underline'}}, 
+              lp.problem_id + ' ' + lp.problem_name
+            )
+          )
+        )
+      ) : null,
+      lps.practice_strategy ? el('p', {style:{fontSize:'.85rem',color:'#334155'}}, lps.practice_strategy) : null
+    );
+    container.append(lcCard);
+  }
   
   coding.problems.forEach((p, idx) => {
     const diffTag = p.difficulty === 'easy' ? 'tag-green' : p.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
+    const sc = p.scoring_criteria || {};
     
-    const pCard = el('div', {className:'card', style:{marginBottom:'12px'}},
+    const problemParts = [];
+    
+    // 题目描述
+    if (p.problem_description) {
+      problemParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.85rem',color:'#334155',whiteSpace:'pre-wrap'}}, p.problem_description)
+      ));
+    }
+    
+    // 输入输出示例
+    if (p.input_output_example) {
+      const io = p.input_output_example;
+      problemParts.push(el('div', {style:{marginBottom:'8px',background:'#f8fafc',padding:'12px',borderRadius:'6px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '输入输出示例：'),
+        io.input ? el('p', {style:{fontSize:'.8rem'}}, '输入: ' + io.input) : null,
+        io.output ? el('p', {style:{fontSize:'.8rem'}}, '输出: ' + io.output) : null,
+        io.explanation ? el('p', {style:{fontSize:'.8rem',color:'#64748b'}}, '说明: ' + io.explanation) : null
+      ));
+    }
+    
+    // 考察点
+    if (p.skills_assessed && p.skills_assessed.length) {
+      problemParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '🎯 考察点：'),
+        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px'}},
+          ...p.skills_assessed.map(s => el('span',{className:'tag tag-gray'}, s))
+        )
+      ));
+    }
+    
+    // LeetCode参考
+    if (p.leetcode_reference) {
+      const lr = p.leetcode_reference;
+      problemParts.push(el('div', {style:{marginBottom:'8px',background:'#fef3c7',padding:'12px',borderRadius:'6px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#f59e0b',fontWeight:600}}, '🔗 LeetCode参考：'),
+        el('a', {href:lr.practice_link, target:'_blank', style:{fontSize:'.85rem',color:'#3b82f6',fontWeight:600,textDecoration:'underline'}}, 
+          lr.problem_id + ' ' + lr.problem_name
+        ),
+        lr.relevance ? el('p', {style:{fontSize:'.8rem',color:'#64748b'}}, '差异说明: ' + lr.relevance) : null
+      ));
+    }
+    
+    // 评分标准
+    if (sc.dimensions && sc.dimensions.length) {
+      problemParts.push(el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '📊 评分标准（总分' + (sc.total_points || 100) + '）：'),
+        el('table', {style:{width:'100%',fontSize:'.8rem',borderCollapse:'collapse'}},
+          el('thead', null,
+            el('tr', null,
+              el('th', {style:{border:'1px solid #e2e8f0',padding:'4px',textAlign:'left'}}, '维度'),
+              el('th', {style:{border:'1px solid #e2e8f0',padding:'4px',textAlign:'center'}}, '权重'),
+              el('th', {style:{border:'1px solid #e2e8f0',padding:'4px',textAlign:'left'}}, '说明')
+            )
+          ),
+          el('tbody', null,
+            ...sc.dimensions.map(d => el('tr', null,
+              el('td', {style:{border:'1px solid #e2e8f0',padding:'4px'}}, d.dimension),
+              el('td', {style:{border:'1px solid #e2e8f0',padding:'4px',textAlign:'center'}}, d.weight + '%'),
+              el('td', {style:{border:'1px solid #e2e8f0',padding:'4px',color:'#64748b'}}, d.description)
+            ))
+          )
+        )
+      ));
+    }
+    
+    // 面试追问
+    if (p.interview_followup) {
+      const ifu = p.interview_followup;
+      if (ifu.suggested_questions && ifu.suggested_questions.length) {
+        problemParts.push(el('div', {style:{marginBottom:'8px'}},
+          el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '💡 面试追问方向：'),
+          el('ul', {style:{fontSize:'.8rem'}}, ...ifu.suggested_questions.map(q => el('li', null, q)))
+        ));
+      }
+    }
+    
+    // 来源追溯
+    if (p.jd_reference || p.gap_reference) {
+      const refParts = [];
+      if (p.jd_reference) refParts.push('JD: ' + p.jd_reference);
+      if (p.gap_reference) refParts.push('差距验证: ' + p.gap_reference);
+      problemParts.push(el('div', {style:{fontSize:'.8rem',color:'#94a3b8'}},
+        el('span', null, '📌 来源：' + refParts.join(' | '))
+      ));
+    }
+    
+    const pCard = el('div', {className:'card', style:{marginBottom:'16px'}},
       el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}},
         el('span', {style:{fontWeight:600}}, `题${idx+1}: ${p.title || ''}`),
         el('div', null,
           el('span',{className:'tag '+diffTag}, p.difficulty || 'medium'),
-          el('span',{className:'tag tag-gray'}, p.problem_type || 'algorithm')
+          el('span',{className:'tag tag-gray'}, p.problem_type || 'algorithm'),
+          p.expected_time_minutes ? el('span',{className:'tag tag-blue'}, p.expected_time_minutes + '分钟') : null
         )
       ),
-      el('p', {style:{fontSize:'.85rem',color:'#475569'}}, p.problem_description || ''),
-      p.leetcode_reference ? el('div', {style:{marginTop:'8px',fontSize:'.8rem'}},
-        el('span', {style:{color:'#3b82f6'}}, 'LeetCode参考: '),
-        el('a', {href:p.leetcode_reference.practice_link, target:'_blank', style:{color:'#3b82f6'}}, p.leetcode_reference.problem_id + ' ' + p.leetcode_reference.problem_name)
-      ) : null
+      ...problemParts
     );
     container.append(pCard);
   });
+  
+  // 约束说明
+  if (coding.constraint_note) {
+    container.append(el('div', {className:'card', style:{background:'#fef3c7'}},
+      el('p', {style:{fontSize:'.85rem'}}, '⚠️ ' + coding.constraint_note)
+    ));
+  }
 }
 
 // Step 8: 学习资源 - 使用现有 renderChapter6 的逻辑

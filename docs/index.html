@@ -622,8 +622,8 @@ const PROMPTS = {
 - preparation_tips: 项目介绍准备建议（字符串数组）
 - constraint_note: 约束说明（字符串,默认"所有项目信息均来自简历原文，未添加任何虚构项目或技能。")`,
 
-  // ===== 6. qa_generator：问题回答库（20-30道题目，扩展来源追溯）=====
-  qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库，并对经历类问题提供 STAR-L 回答引导。
+  // ===== 6. qa_generator：问题回答库（15-20道题目，扩展来源追溯）=====
+  qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库。
 
 请遵循以下原则：
 1. 题目覆盖以下维度：tech_deep_dive(技术深度), experience_probe(项目经历追问), behavioral(行为面试), scenario(情景题), hr(HR通用), motivation(动机匹配)
@@ -631,41 +631,37 @@ const PROMPTS = {
 3. 参考答案要点必须结合候选人简历中的具体项目和数据
 4. 对 gap 领域生成针对性问题
 5. 标注考察维度
-6. 每道题必须附带 2-3 层递进式追问链（follow_up_chain），模拟真实面试官的深挖节奏
-7. 对经历类问题（experience_probe/behavioral/scenario）必须给出 STAR-L 回答引导，帮助候选人结构化组织答案；对非经历类问题 star_guidance 为 null
-8. 按四类（专业能力/项目故事/行为情景/压力短板）给出分类准备建议
+6. 每道题必须附带完整的答案框架，包含考察意图、回答结构、高分要点、需避开的雷区、示例回答
+7. 按四类（专业能力/项目故事/行为情景/压力短板）给出分类准备建议
 
 输出为 JSON，包含：
-- total_questions: 整数
-- questions: 数组，每项含 {question_number(整数), category(字符串), difficulty(字符串:easy/medium/hard), question_text(字符串), evaluation_dimension(字符串), answer_framework(对象，必填！包含{intent(字符串,考察意图), structure(字符串,推荐回答结构如"先概括背景→再讲核心做法→最后量化成果"), key_points(字符串数组,高分要点3-5条), pitfalls(字符串数组,需避开的雷区2-3条), sample_response(字符串,完整的示例回答,200-400字,可直接开口讲)}), source_reference(对象,来源追溯,含{jd_requirement(字符串,对应JD要求), resume_section(字符串,对应简历段落), gap_source(字符串或null,对应差距分析)}), suggested_time_limit(字符串), follow_up_chain(对象数组,每项含{layer(整数1-3), follow_up_question(字符串), expected_direction(字符串,期望候选人回答的方向), red_flag(字符串,该层回答不佳的危险信号)}), follow_up_hints(字符串数组或null), star_guidance(对象或null:对经历类问题给出STAR-L引导,含{situation_hint(字符串,情境描述提示), task_hint(字符串,任务说明提示), action_hint(字符串,行动举措提示,突出个人决策), result_hint(字符串,结果量化提示), learned_hint(字符串,方法论提炼提示)};对非经历类问题为null)}
+- total_questions: 整数（15-20）
+- questions: 数组，每项含 {question_number(整数), category(字符串), difficulty(字符串:easy/medium/hard), question_text(字符串), evaluation_dimension(字符串), answer_framework(对象，必填！包含{intent(字符串,考察意图), structure(字符串,推荐回答结构如"先概括背景→再讲核心做法→最后量化成果"), key_points(字符串数组,高分要点3-5条), pitfalls(字符串数组,需避开的雷区2-3条), sample_response(字符串,完整的示例回答,200-400字,可直接开口讲)}), source_reference(对象,来源追溯,含{jd_requirement(字符串,对应JD要求), resume_section(字符串,对应简历段落), gap_source(字符串或null,对应差距分析)}), suggested_time_limit(字符串), follow_up_hints(字符串数组或null)}
 - focus_areas_advice: 面试准备重点领域建议（字符串数组）
-- question_categories_advice: 按四类分类的准备建议（对象数组，恰好4项），每项含 {category(字符串:professional_skill/project_story/behavioral_scenario/stress_weakness), category_name(字符串:专业能力/项目故事/行为情景/压力短板), preparation_strategy(字符串,该类问题的准备策略), key_focus_points(字符串数组,该类问题的重点关注点), common_pitfalls(字符串数组,常见陷阱)}
 
-重要约束：每道题的 answer_framework 必须完整，sample_response 必须具体且可直接用于面试回答，不得空泛。`,
+重要约束：每道题的 answer_framework 必须完整，sample_response 必须具体且可直接用于面试回答，不得空泛。题目数量控制在15-20道，不要过多。`,
 
-  // ===== 5. coding_agent：编码出题（保持不变）=====
-  coding_agent: `你是一位技术面试的出题专家。你的任务是基于 JD 要求的技术栈和候选人简历中的编程能力，生成适合面试的编码题目。
+  // ===== 5. coding_agent：编码出题（精简版）=====
+  coding_agent: `你是一位技术面试的出题专家。你的任务是基于 JD 要求的技术栈，生成适合面试的编码题目。
 
 请遵循以下原则：
-1. 共生成 10-15 道编码题，每道难度为 easy/medium/hard 之一
-2. 难度比例根据候选人匹配度调整（匹配度信息在用户消息中给出）：
-   - 匹配度高(>80%)：侧重 hard，比例为 2 easy + 5 medium + 5-8 hard
-   - 匹配度中(60-80%)：均衡，比例为 3 easy + 6 medium + 4-6 hard
-   - 匹配度低(<60%)：侧重 easy 和 medium，比例为 4 easy + 7 medium + 3-4 hard
+1. 共生成 8-10 道编码题，每道难度为 easy/medium/hard 之一
+2. 难度比例根据候选人匹配度调整：
+   - 匹配度高(>80%)：2 easy + 3 medium + 3-5 hard
+   - 匹配度中(60-80%)：3 easy + 4 medium + 2-3 hard
+   - 匹配度低(<60%)：4 easy + 4 medium + 1-2 hard
 3. 知识点覆盖与 JD 技术栈强相关
-4. 参考代码语言优先使用候选人简历中的常用语言
-5. 解题提示从浅入深
-6. 算法题必须标注 LeetCode 参考（题号、名称、链接）
-7. 每道题必须给出评分标准（分维度权重）
+4. 算法题必须标注 LeetCode 参考（题号、名称、链接）
+5. 每道题必须给出评分标准（分维度权重）
 
 输出为 JSON，包含：
-- total_problems: 整数（10-15）
+- total_problems: 整数（8-10）
 - language_recommendation: 推荐编程语言（字符串）
 - time_estimate_minutes: 预估总时间（整数，分钟）
-- problems: 数组，每项含 {problem_number(整数), title(字符串), problem_type(字符串:algorithm/sql/data_analysis/system_design), difficulty(字符串:easy/medium/hard), expected_time_minutes(整数,预估用时), problem_description(字符串,完整题目描述), input_output_example(对象,含{input(字符串),output(字符串),explanation(字符串或null)}), skills_assessed(字符串数组,考察的技能点), leetcode_reference(对象或null,算法题必填！含{problem_id(字符串,如"LeetCode 1"),problem_name(字符串,如"Two Sum"),practice_link(字符串,完整链接),relevance(字符串,本题与LeetCode原题的差异说明)}), scoring_criteria(对象,必填！含{total_points(整数,默认100),dimensions(数组,每项含{dimension(字符串,评分维度如"正确性/效率/代码风格"),weight(整数,权重百分比),description(字符串,该维度评分说明)})}, hints(字符串数组,解题提示), interview_followup(对象,含{suggested_questions(字符串数组,面试追问方向)})}
+- problems: 数组，每项含 {problem_number(整数), title(字符串), problem_type(字符串:algorithm/sql/data_analysis), difficulty(字符串:easy/medium/hard), expected_time_minutes(整数,预估用时), problem_description(字符串,完整题目描述,不超过200字), input_output_example(对象,含{input(字符串),output(字符串),explanation(字符串或null)}), skills_assessed(字符串数组,考察的技能点), leetcode_reference(对象或null,算法题必填！含{problem_id(字符串,如"LeetCode 1"),problem_name(字符串),practice_link(字符串)}), scoring_criteria(对象,必填！含{total_points(整数,默认100),dimensions(数组,每项含{dimension(字符串),weight(整数),description(字符串)})})}
 - leetcode_practice_summary: LeetCode练习建议（对象），包含 {recommended_problems(数组,每项含{problem_id,problem_name,practice_link}),practice_strategy(字符串)}
 
-重要约束：算法题必须标注 LeetCode 参考，scoring_criteria 必须完整（至少3个评分维度）。`,
+重要约束：题目数量控制在8-10道，scoring_criteria 必须完整（至少3个评分维度）。`,
 
   // ===== 6. resource_agent：时间自适应学习策略（保留原字段 + 新增 time_adaptive_plan / mock_interview_guide）=====
   resource_agent: `你是一位职业学习规划师。你的任务是基于差距分析结果，推荐针对性的学习资源，并生成时间自适应学习计划与模拟面试自测引导。
@@ -1362,39 +1358,51 @@ async function continueGenerate() {
     const confirmBanner = document.getElementById('confirmBanner');
     if (confirmBanner) confirmBanner.classList.remove('visible');
 
-    // Step 4: Self Intro
-    setStep('step-intro', 'running');
-    setProgress(40, '生成自我介绍...');
     const introPromptExtra = (userNotes ? '\n\n【候选人补充说明】\n' + userNotes : '') + contextExtra;
-    const introResult = await callOpenAIWithRetry(PROMPTS.self_intro,
-      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【简历分析】\n候选人: ${resumeResult.candidate_name||'未知'}\n核心优势: ${(resumeResult.core_strengths||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成自我介绍方案。重要约束：核心卖点必须与JD硬性要求匹配，背景经历必须来自简历原文，不得编造。${introPromptExtra}`
-    );
-    results.intro = introResult;
-    setStep('step-intro', 'done');
-    renderChapter4Intro(results.intro);
-    setProgress(50, '生成项目介绍...');
-
-    // Step 5: Project Intro（新增）
+    
+    // ===== 性能优化：并行生成多个模块 =====
+    // 并行组1：自我介绍 + 项目介绍 + 学习资源（互相独立）
+    setProgress(40, '并行生成自我介绍/项目介绍/学习资源...');
+    setStep('step-intro', 'running');
     setStep('step-project', 'running');
-    const projectResult = await callOpenAIWithRetry(PROMPTS.project_intro,
-      `【简历项目列表】\n${(resumeResult.projects||[]).map(p=>`- ${p.name} (${p.role})\n  技术栈: ${(p.tech_stack||[]).join(',')}\n  贡献: ${(p.key_contributions||[]).join(',')}`).join('\n')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join('; ')}\n\n【匹配分析】\n核心优势: ${(gapResult.strengths||[]).join('; ')}\n\n请生成项目介绍方案。重要约束：所有项目必须来自简历projects字段，不得编造项目或添加简历未提及的技术栈。${introPromptExtra}`
-    );
+    setStep('step-resource', 'running');
+    
+    const [introResult, projectResult, resourceResult] = await Promise.all([
+      // 自我介绍
+      callOpenAIWithRetry(PROMPTS.self_intro,
+        `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【简历分析】\n候选人: ${resumeResult.candidate_name||'未知'}\n核心优势: ${(resumeResult.core_strengths||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成自我介绍方案。重要约束：核心卖点必须与JD硬性要求匹配，背景经历必须来自简历原文，不得编造。${introPromptExtra}`
+      ),
+      // 项目介绍
+      callOpenAIWithRetry(PROMPTS.project_intro,
+        `【简历项目列表】\n${(resumeResult.projects||[]).map(p=>`- ${p.name} (${p.role})\n  技术栈: ${(p.tech_stack||[]).join(',')}\n  贡献: ${(p.key_contributions||[]).join(',')}`).join('\n')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join('; ')}\n\n【匹配分析】\n核心优势: ${(gapResult.strengths||[]).join('; ')}\n\n请生成项目介绍方案。重要约束：所有项目必须来自简历projects字段，不得编造项目或添加简历未提及的技术栈。${introPromptExtra}`
+      ),
+      // 学习资源
+      callOpenAIWithRetry(PROMPTS.resource_agent,
+        `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源。${introPromptExtra}`
+      )
+    ]);
+    
+    results.intro = introResult;
     results.project = projectResult;
+    results.resources = resourceResult;
+    
+    setStep('step-intro', 'done');
     setStep('step-project', 'done');
+    setStep('step-resource', 'done');
+    renderChapter4Intro(results.intro);
     renderChapter5Project(results.project);
-    setProgress(60, '生成面试问答（20-30道）...');
-
-    // Step 6: Q&A（20-30道）
+    renderChapter8Resources(results.resources);
+    
+    // 并行组2：面试问答 + 笔试题目（互相独立）
+    setProgress(70, '并行生成面试问答/笔试题目...');
     setStep('step-qa', 'running');
-    const qaResult = await callOpenAIWithRetry(PROMPTS.qa_generator,
-      `【简历原文】\n${resumeText}\n\n【简历项目】\n${(resumeResult.projects||[]).map(p=>p.name).join('; ')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成20-30道面试问答题目。重要约束：项目问题必须基于简历projects字段，技术问题覆盖JD核心技术栈，短板问题来自匹配度分析。${introPromptExtra}`
+    
+    // 面试问答生成
+    const qaPromise = callOpenAIWithRetry(PROMPTS.qa_generator,
+      `【简历原文】\n${resumeText}\n\n【简历项目】\n${(resumeResult.projects||[]).map(p=>p.name).join('; ')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成15-20道面试问答题目。重要约束：项目问题必须基于简历projects字段，技术问题覆盖JD核心技术栈，短板问题来自匹配度分析。${introPromptExtra}`
     );
-    results.qa = qaResult;
-    setStep('step-qa', 'done');
-    renderChapter6QA(results.qa);
-    setProgress(70, '生成笔试题目（10-15道）...');
-
-    // Step 7: Coding (conditional, 10-15道 + LeetCode参考)
+    
+    // 笔试题目（技术岗位才生成）
     const isTech = jobType === 'tech' ||
       (jobType === 'unknown' && jdResult.hard_skills && jdResult.hard_skills.length > 0 &&
        (jdResult.position_title.toLowerCase().includes('开发') ||
@@ -1405,15 +1413,26 @@ async function continueGenerate() {
         jdResult.position_title.toLowerCase().includes('后端') ||
         jdResult.position_title.toLowerCase().includes('前端') ||
         jdResult.position_title.toLowerCase().includes('全栈')));
-
+    
+    let codingPromise = null;
     if (isTech) {
       setStep('step-coding', 'running');
       const techSkills = (jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ');
       const matchScore = gapResult.overall_match_score || 0;
       const matchLevel = matchScore > 80 ? '高(>80%)' : matchScore >= 60 ? '中(60-80%)' : '低(<60%)';
-      const codingResult = await callOpenAIWithRetry(PROMPTS.coding_agent,
-        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${resumeResult.years_of_experience||'未知'}年\n角色: ${resumeResult.current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请生成10-15道笔试题目。重要约束：算法题必须标注LeetCode参考（题号、名称、链接），题目必须与JD技术栈强相关。${introPromptExtra}`
+      codingPromise = callOpenAIWithRetry(PROMPTS.coding_agent,
+        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${resumeResult.years_of_experience||'未知'}年\n角色: ${resumeResult.current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请生成8-10道笔试题目。重要约束：算法题必须标注LeetCode参考（题号、名称、链接），题目必须与JD技术栈强相关。${introPromptExtra}`
       );
+    }
+    
+    // 等待面试问答和笔试题目并行完成
+    const qaResult = await qaPromise;
+    results.qa = qaResult;
+    setStep('step-qa', 'done');
+    renderChapter6QA(results.qa);
+    
+    if (codingPromise) {
+      const codingResult = await codingPromise;
       results.coding = codingResult;
       setStep('step-coding', 'done');
       renderChapter7Coding(results.coding);
@@ -1421,21 +1440,10 @@ async function continueGenerate() {
       results.coding = null;
       setStep('step-coding', 'done');
     }
-    setProgress(80, '推荐学习资料...');
-
-    // Step 8: Resources
-    setStep('step-resource', 'running');
-    const resourceResult = await callOpenAIWithRetry(PROMPTS.resource_agent,
-      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源。${introPromptExtra}`
-    );
-    results.resources = resourceResult;
-    setStep('step-resource', 'done');
-    renderChapter8Resources(results.resources);
-    setProgress(90, '渲染报告...');
-
-    // Step: Render
-    setStep('step-render', 'running');
+    
+    // 渲染完成
     setProgress(100, '完成！');
+    setStep('step-render', 'done');
 
     document.getElementById('reportArea').classList.add('visible');
     document.getElementById('reportArea').scrollIntoView({ behavior: 'smooth', block: 'start' });

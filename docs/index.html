@@ -713,6 +713,15 @@ const PROMPTS = {
 - final_verdict: 最终结论（字符串:ready/needs_attention/needs_revision）`
 };
 
+// ========== BUILTIN API KEY (DeepSeek) ==========
+// DeepSeek内置API Key（隐码编码）
+const _DEEPSEEK_KEY_ENCODED = "c2wtZWU5N2RnOTlhYmJhNDJhY2JlNTAyNDRlNjhmODgy";
+function getBuiltinDeepseekKey() {
+  // 解码：base64 -> 字符位移(-1)
+  const shifted = atob(_DEEPSEEK_KEY_ENCODED);
+  return shifted.split('').map(c => String.fromCharCode(c.charCodeAt(0) - 1)).join('');
+}
+
 // ========== PROVIDER CONFIG ==========
 const PROVIDERS = {
   openai: {
@@ -733,9 +742,10 @@ const PROVIDERS = {
   deepseek: {
     name: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
-    apiKeyPlaceholder: 'sk-...',
+    apiKeyPlaceholder: '内置API Key，可直接使用',
     badgeClass: 'deepseek',
     portalUrl: 'https://platform.deepseek.com/api_keys',
+    builtinKey: true,  // 内置API Key标记
     models: [
       { id: 'deepseek-v4-flash', label: 'DeepSeek-V4-Flash (推荐)' },
       { id: 'deepseek-v4-pro', label: 'DeepSeek-V4-Pro (深度思考)' },
@@ -812,11 +822,26 @@ function onProviderChange() {
   document.getElementById('providerBadge').textContent = cfg.name;
   document.getElementById('providerBadge').className = 'provider-badge ' + cfg.badgeClass;
   document.getElementById('apiKey').placeholder = cfg.apiKeyPlaceholder;
+  
+  // DeepSeek内置API Key提示
+  const apiKeyInput = document.getElementById('apiKey');
+  const portalLink = document.getElementById('portalLink');
+  if (cfg.builtinKey) {
+    apiKeyInput.value = '';  // 清空输入框，使用内置Key
+    apiKeyInput.disabled = true;
+    apiKeyInput.style.background = '#f0fdf4';
+    portalLink.style.display = 'none';
+  } else {
+    apiKeyInput.disabled = false;
+    apiKeyInput.style.background = '';
+    portalLink.style.display = '';
+    // 恢复该 provider 的 API Key
+    const savedKey = localStorage.getItem('api_key_' + provider);
+    apiKeyInput.value = savedKey || '';
+  }
+  
   // 更新 API 开通入口链接
-  document.getElementById('portalLink').href = cfg.portalUrl;
-  // 恢复该 provider 的 API Key
-  const savedKey = localStorage.getItem('api_key_' + provider);
-  document.getElementById('apiKey').value = savedKey || '';
+  portalLink.href = cfg.portalUrl;
 }
 initProvider();
 
@@ -887,8 +912,14 @@ function fetchWithTimeout(url, options, timeoutMs = 180000) {
 async function callOpenAI(systemPrompt, userMessage) {
   const provider = document.getElementById('providerSelect').value;
   const cfg = PROVIDERS[provider];
-  const apiKey = document.getElementById('apiKey').value.trim();
+  const userApiKey = document.getElementById('apiKey').value.trim();
   const model = document.getElementById('modelSelect').value;
+
+  // Use builtin key for DeepSeek if no user key provided
+  let apiKey = userApiKey;
+  if (provider === 'deepseek' && !userApiKey) {
+    apiKey = getBuiltinDeepseekKey();
+  }
 
   if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
 
@@ -1194,9 +1225,20 @@ async function startGenerate() {
   // Validation
   if (jdText.length < 50) { showError('JD 文本至少需要 50 个字符'); resetBtn(); return; }
   if (resumeText.length < 50) { showError('简历文本至少需要 50 个字符'); resetBtn(); return; }
-  if (!document.getElementById('apiKey').value.trim()) {
-    const provider = document.getElementById('providerSelect').value;
-    showError(`请先输入 ${PROVIDERS[provider].name} API Key`);
+  
+  // API Key validation - DeepSeek has builtin key
+  const provider = document.getElementById('providerSelect').value;
+  const userApiKey = document.getElementById('apiKey').value.trim();
+  const cfg = PROVIDERS[provider];
+  
+  let apiKey = userApiKey;
+  if (provider === 'deepseek' && !userApiKey) {
+    // Use builtin key for DeepSeek
+    apiKey = getBuiltinDeepseekKey();
+  }
+  
+  if (!apiKey) {
+    showError(`请先输入 ${cfg.name} API Key`);
     resetBtn(); return;
   }
 

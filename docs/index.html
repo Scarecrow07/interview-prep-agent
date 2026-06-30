@@ -486,7 +486,7 @@ details[open] .qa-summary::before{content:'−'}
 <script>
 // ========== SYSTEM PROMPTS (from Python prompts/) ==========
 const PROMPTS = {
-  // ===== 1. jd_analyzer：JD 深度分析（保留原字段 + 新增 hidden_requirements）=====
+  // ===== 1. jd_analyzer：JD 深度分析（保留原字段 + 新增 hidden_requirements + 可选要求识别）=====
   jd_analyzer: `你是一位资深的招聘分析师和职业顾问。你的任务是对给定的职位描述（JD）进行深入分析，提取结构化信息，并洞察字里行间的隐含要求。
 
 请遵循以下原则：
@@ -495,13 +495,24 @@ const PROMPTS = {
 3. 级别判断：根据经验年限要求和职责描述准确判断岗位级别。
 4. 关键评价维度：从 JD 中提炼出面试官最可能用来评估候选人的维度。
 5. 隐含要求洞察：从职责描述的字里行间推断实际工作场景和隐含的技术能力要求（如 JD 写"负责高并发系统"则隐含需要掌握分布式架构、缓存、限流降级等）。
+6. 可选要求识别：注意识别JD中的可选要求，正确设置 is_required 字段。
+
+【is_required 判断规则】
+- is_required = true（必备条件）：JD中使用"必须"、"必备"、"要求"、"需要"、"应当"等强制性词语
+- is_required = false（可选/加分项）：JD中出现以下情况时标记为可选：
+  1. "例如"、"如"、"比如"后面列举的内容（仅作为示例，不要求全部掌握）
+  2. "等"、"某某等"结尾的列举（表示不完整列举，其他项可选）
+  3. "或"、"或者"、"任选其一"（表示选择其一即可，不要求全部）
+  4. "优先"、"加分项"、"期望"、"nice to have"、"preferred"、"preferred but not required"
+  5. "有...经验的优先"、"熟悉...者优先"、"了解...为佳"
+  6. 技术栈列举中用"/"分隔的选项（如"Java/Python/Go"表示任选其一）
 
 输出为 JSON 对象，包含以下字段：
 - position_title: 岗位名称（字符串）
 - company_industry: 公司行业（字符串或 null）
 - summary: JD 核心摘要（字符串，100字以内）
 - core_responsibilities: 核心职责列表（字符串数组，3-8条）
-- hard_skills: 硬性技能数组，每项含 {tech_name(字符串), proficiency_level(字符串:了解/熟悉/精通/专家), is_required(boolean), reason_from_jd(字符串,引用依据)}
+- hard_skills: 硬性技能数组，每项含 {tech_name(字符串), proficiency_level(字符串:了解/熟悉/精通/专家), is_required(boolean,根据上述规则判断), reason_from_jd(字符串,引用依据,注明是必备还是可选及其原因)}
 - soft_skills: 软技能数组，每项含 {skill_name(字符串), context(字符串)}
 - experience_requirement: {min_years(整数), preferred_industry(字符串数组), preferred_role(字符串或null)}
 - education_requirement: 学历要求（字符串或 null）
@@ -509,7 +520,7 @@ const PROMPTS = {
 - key_evaluation_criteria: 面试评价的关键维度（字符串数组，3-5条）
 - hidden_requirements: 从职责描述中推断的实际工作场景和隐含技术要求（对象数组），每项含 {inferred_requirement(字符串,推断出的隐含要求), inferred_from(字符串,JD中的推断依据), real_scenario(字符串,对应的实际工作场景说明), preparation_hint(字符串,针对此隐含要求的准备建议)}
 
-字段说明：is_required 为 true 表示必备条件中明确列出，false 表示加分项中提到。`,
+字段说明：is_required 必须严格按照上述判断规则设置，reason_from_jd 中必须注明该技能是"必备条件"还是"可选/加分项"及其判断依据。`,
 
   // ===== 2. resume_analyzer：简历分析（新增，来源追溯防止编造）=====
   resume_analyzer: `你是一位资深的简历分析师。你的任务是对给定简历进行深入分析，提取结构化信息，特别关注项目经历和技术栈。

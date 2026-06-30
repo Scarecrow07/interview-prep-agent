@@ -1,39 +1,48 @@
-"""笔试编码题生成 Agent"""
+"""笔试题目生成 Agent"""
 
 from src.agents.base import run_structured_agent
 from src.models.jd_analysis import JDAnalysis
 from src.models.gap_analysis import GapAnalysis
 from src.models.coding_problem import CodingProblemSet
+from typing import Optional
 
 
 def run_coding_agent(
-    jd_analysis: JDAnalysis | None,
-    gap_analysis: GapAnalysis | None,
+    jd_analysis: Optional[JDAnalysis],
+    gap_analysis: Optional[GapAnalysis],
 ) -> CodingProblemSet:
-    """运行编码题生成 Agent"""
-    context_parts = []
+    """运行笔试题目生成 Agent
 
+    Args:
+        jd_analysis: JD分析结果
+        gap_analysis: 匹配度分析结果
+    Returns:
+        CodingProblemSet 笔试题目集（10-15道）
+    """
+    jd_summary = ""
     if jd_analysis:
-        tech_skills = jd_analysis.hard_skills
-        tech_summary = "; ".join(
-            f"{s.tech_name}({s.proficiency_level})" for s in tech_skills
-        )
-        context_parts.append(
-            f"【JD技术要求】\n"
+        jd_summary = (
+            f"【JD分析摘要】\n"
             f"岗位: {jd_analysis.position_title}\n"
             f"级别: {jd_analysis.role_level}\n"
-            f"技术栈: {tech_summary}\n"
-            f"职责: {'; '.join(jd_analysis.core_responsibilities)}\n"
+            f"核心职责: {'; '.join(jd_analysis.core_responsibilities)}\n"
+            f"硬技能: {'; '.join(f'{s.tech_name}({s.proficiency_level})' for s in jd_analysis.hard_skills)}\n"
+            f"评价维度: {'; '.join(jd_analysis.key_evaluation_criteria)}\n"
         )
 
+    gap_summary = ""
     if gap_analysis:
-        context_parts.append(
-            f"【候选人编程能力】\n"
-            f"年限: {gap_analysis.resume_summary.years_of_experience}年\n"
-            f"当前角色: {gap_analysis.resume_summary.current_role}\n"
+        gap_summary = (
+            f"【匹配度分析摘要】\n"
+            f"整体匹配度: {gap_analysis.overall_match_score}%\n"
+            f"短板: {'; '.join(gap_analysis.top_gaps)}\n"
         )
 
-    user_message = "\n".join(context_parts) + "\n\n请生成适合该岗位面试的编码题目。"
+    user_message = (
+        f"{jd_summary}\n"
+        f"{gap_summary}\n\n"
+        "请生成10-15道笔试题目。重要约束：算法题必须标注LeetCode参考，题目必须与JD技术栈强相关。"
+    )
 
     return run_structured_agent(
         model_class=CodingProblemSet,

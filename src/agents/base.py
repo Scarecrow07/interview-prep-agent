@@ -2,26 +2,73 @@
 
 import os
 from pathlib import Path
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Optional
 
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 from src.utils.cache import get_cache, set_cache
+from src.utils.llm_config import LLMProvider, get_llm_config, setup_environment
 
 T = TypeVar("T", bound=BaseModel)
 
 _PROMPT_DIR = Path(__file__).parent / "prompts"
 
-# 默认 LLM 配置
-_DEFAULT_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
-_DEFAULT_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.3"))
+# 全局 LLM 配置（可通过 set_llm_provider 更新）
+_current_provider: LLMProvider = LLMProvider.DEEPSEEK
+_current_api_key: Optional[str] = None
+_current_base_url: Optional[str] = None
+_current_model: Optional[str] = None
+_default_temperature: float = 0.3
 
 
-def get_llm(temperature: float | None = None) -> ChatOpenAI:
-    """获取 LLM 实例"""
+def set_llm_provider(
+    provider: LLMProvider,
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+    model: Optional[str] = None,
+    temperature: Optional[float] = None,
+) -> dict:
+    """设置全局 LLM 配置
+    
+    Args:
+        provider: LLM 厂商
+        api_key: API Key（DeepSeek 可不提供）
+        base_url: 自定义 base URL
+        model: 模型名称
+        temperature: 温度参数
+        
+    Returns:
+        当前配置字典
+    """
+    global _current_provider, _current_api_key, _current_base_url, _current_model, _default_temperature
+    
+    _current_provider = provider
+    _current_api_key = api_key
+    _current_base_url = base_url
+    _current_model = model
+    if temperature is not None:
+        _default_temperature = temperature
+    
+    config = get_llm_config(provider, api_key, base_url, model)
+    setup_environment(config)
+    
+    return config
+
+
+def get_llm(temperature: Optional[float] = None) -> ChatOpenAI:
+    """获取 LLM 实例（使用当前配置）"""
+    config = get_llm_config(
+        provider=_current_provider,
+        api_key=_current_api_key,
+        base_url=_current_base_url,
+        model=_current_model,
+    )
+    
     return ChatOpenAI(
-        model=_DEFAULT_MODEL,
-        temperature=temperature or _DEFAULT_TEMPERATURE,
+        model=config["model"],
+        temperature=temperature or _default_temperature,
+        api_key=config["api_key"],
+        base_url=config["base_url"],
     )
 
 
@@ -66,3 +113,18 @@ def run_structured_agent(
             pass  # 缓存写入失败不阻塞主流程
 
     return result
+
+
+def get_current_provider_info() -> dict:
+    """获取当前 LLM 配置信息（用于界面显示）"""
+    config = get_llm_config(
+        provider=_current_provider,
+        api_key=_current_api_key,
+        base_url=_current_base_url,
+        model=_current_model,
+    )
+    return {
+        "provider": config["provider_name"],
+        "model": config["model"],
+        "has_builtin_key": _current_provider == LLMProvider.DEEPSEEK and _current_api_key is None,
+    }

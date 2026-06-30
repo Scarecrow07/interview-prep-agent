@@ -1441,6 +1441,13 @@ async function continueGenerate() {
       setStep('step-coding', 'done');
     }
     
+    // 渲染报告
+    setProgress(90, '渲染报告...');
+    setStep('step-render', 'running');
+    
+    // 等待一小段时间让UI更新
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // 渲染完成
     setProgress(100, '完成！');
     setStep('step-render', 'done');

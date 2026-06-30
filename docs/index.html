@@ -378,21 +378,10 @@ details[open] .qa-summary::before{content:'−'}
         </div>
       </div>
       <div class="context-field" style="margin-top:8px">
-        <label for="hrNotes">HR沟通情况 / 其他补充</label>
-        <textarea id="hrNotes" placeholder="如：HR提到团队偏重数据工程能力，希望候选人有大厂经验；薪资范围 30-40K；岗位是急招；之前面试反馈沟通能力需加强..." style="min-height:60px"></textarea>
+        <label for="backgroundInfo">HR沟通情况 / 公司调研 / 岗位画像</label>
+        <textarea id="backgroundInfo" placeholder="可填写以下任意信息，帮助生成更精准的方案：&#10;&#10;【HR沟通情况】&#10;- 薪资范围、岗位急招程度、团队偏好&#10;- 之前面试反馈、期望入职时间&#10;&#10;【公司调研信息】&#10;- 公司核心战略和近期动态&#10;- 产品痛点、竞争对手、市场定位&#10;- 团队规模、技术栈、岗位使命&#10;&#10;【面经/考察重点】&#10;- 已知面试官风格、常问问题类型&#10;- 白板编程/系统设计偏好&#10;&#10;不填写则仅依赖 JD 和简历自动分析。" style="min-height:120px;font-size:.82rem"></textarea>
       </div>
       <p style="font-size:.72rem;color:#94a3b8;margin-top:6px">💡 以上信息将传递给 LLM，帮助生成更贴合实际面试场景的方案。不会保存或上传到任何服务器。</p>
-    </div>
-  </details>
-
-  <details class="context-details" style="margin-bottom:12px">
-    <summary class="context-summary">🎯 岗位画像 / 靶心文档（可选，填写后方案更精准）</summary>
-    <div class="context-body">
-      <div class="context-field">
-        <label for="targetDoc">公司调研信息</label>
-        <textarea id="targetDoc" placeholder="可粘贴你对该公司的调研信息，例如：&#10;- 公司核心战略和近期动态&#10;- 产品痛点和竞争对手&#10;- 团队规模和岗位使命&#10;- 面经中提到的考察重点&#10;不填写则仅依赖 JD 自动分析。" style="min-height:100px;font-size:.82rem"></textarea>
-      </div>
-      <p style="font-size:.72rem;color:#94a3b8;margin-top:6px">💡 填写后，这些信息将注入后续所有章节的生成过程，帮助方案更贴合实际面试场景。</p>
     </div>
   </details>
 
@@ -1199,8 +1188,7 @@ async function startGenerate() {
     companyName: document.getElementById('companyName')?.value.trim() || '',
     interviewRound: document.getElementById('interviewRound')?.value || '',
     interviewFormat: document.getElementById('interviewFormat')?.value || '',
-    hrNotes: document.getElementById('hrNotes')?.value.trim() || '',
-    targetDoc: document.getElementById('targetDoc')?.value.trim() || ''
+    backgroundInfo: document.getElementById('backgroundInfo')?.value.trim() || ''
   };
 
   // Validation
@@ -1232,8 +1220,8 @@ async function startGenerate() {
     // Step 1: JD Analysis
     setStep('step-jd', 'running');
     setProgress(10, '正在分析 JD...');
-    const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.hrNotes || interviewContext.targetDoc)
-      ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.hrNotes?('HR沟通情况：'+interviewContext.hrNotes):'',interviewContext.targetDoc?('岗位画像/靶心文档：\n'+interviewContext.targetDoc):''].filter(Boolean).join('\n')}` : '';
+    const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.backgroundInfo)
+      ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.backgroundInfo?('补充信息：\n'+interviewContext.backgroundInfo):''].filter(Boolean).join('\n')}` : '';
     const jdResult = await callOpenAIWithRetry(PROMPTS.jd_analyzer,
       `请分析以下职位描述（JD）：\n\n${jdText}${phase1Context}`
     );
@@ -1318,7 +1306,7 @@ async function continueGenerate() {
   if (ivCtx.companyName) ctxParts.push('面试公司：' + ivCtx.companyName);
   if (ivCtx.interviewRound) ctxParts.push('面试轮次：' + ivCtx.interviewRound);
   if (ivCtx.interviewFormat) ctxParts.push('面试形式：' + ivCtx.interviewFormat);
-  if (ivCtx.hrNotes) ctxParts.push('HR沟通情况：' + ivCtx.hrNotes);
+  if (ivCtx.backgroundInfo) ctxParts.push('补充信息：\n' + ivCtx.backgroundInfo);
   const contextExtra = ctxParts.length ? '\n\n【面试背景信息】\n' + ctxParts.join('\n') : '';
 
   try {

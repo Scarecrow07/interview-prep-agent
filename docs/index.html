@@ -269,8 +269,8 @@ details[open] .qa-summary::before{content:'−'}
   <div class="container">
     <h1>AI 面试准备方案生成器</h1>
     <p>上传职位描述（JD）和简历，自动生成结构化面试准备方案</p>
-    <div class="badge">v0.1.0 · 浏览器端运行</div>
-    <div class="privacy-notice">🔒 所有输入信息仅在本地浏览器处理，不会上传到任何服务器</div>
+    <div class="badge">v0.2.0 · 7步面试作战手册 · DeepSeek内置API Key</div>
+    <div class="privacy-notice">🔒 所有输入信息仅在本地浏览器处理，不会上传到任何服务器 | DeepSeek API Key内置可直接使用</div>
   </div>
 </header>
 
@@ -411,14 +411,14 @@ details[open] .qa-summary::before{content:'−'}
   <div style="margin-top:14px">
     <div class="progress-steps">
       <div class="progress-step" id="step-precheck"><span class="step-icon">✓</span> 输入校验</div>
-      <div class="progress-step" id="step-jd"><span class="step-icon">1</span> JD 分析</div>
-      <div class="progress-step" id="step-gap"><span class="step-icon">2</span> 匹配诊断</div>
-      <div class="progress-step" id="step-intro"><span class="step-icon">3</span> 自我介绍</div>
-      <div class="progress-step" id="step-qa"><span class="step-icon">4</span> 面试问答</div>
-      <div class="progress-step" id="step-coding"><span class="step-icon">5</span> 编码题</div>
-      <div class="progress-step" id="step-resource"><span class="step-icon">6</span> 学习资源</div>
-      <div class="progress-step" id="step-mock"><span class="step-icon">7</span> 模拟自测</div>
-      <div class="progress-step" id="step-verify"><span class="step-icon">8</span> 六维校验</div>
+      <div class="progress-step" id="step-jd"><span class="step-icon">1</span> JD分析</div>
+      <div class="progress-step" id="step-resume"><span class="step-icon">2</span> 简历分析</div>
+      <div class="progress-step" id="step-gap"><span class="step-icon">3</span> 匹配诊断</div>
+      <div class="progress-step" id="step-intro"><span class="step-icon">4</span> 自我介绍</div>
+      <div class="progress-step" id="step-project"><span class="step-icon">5</span> 项目介绍</div>
+      <div class="progress-step" id="step-qa"><span class="step-icon">6</span> 面试问答</div>
+      <div class="progress-step" id="step-coding"><span class="step-icon">7</span> 笔试题目</div>
+      <div class="progress-step" id="step-resource"><span class="step-icon">8</span> 学习资源</div>
       <div class="progress-step" id="step-render"><span class="step-icon">☆</span> 渲染报告</div>
     </div>
   </div>
@@ -444,54 +444,54 @@ details[open] .qa-summary::before{content:'−'}
 
 <!-- Chapter 1: JD Analysis -->
 <section>
-  <h2>一、深度侦察 — JD 核心分析与岗位画像</h2>
+  <h2>一、Step 1 — JD核心分析与岗位画像</h2>
   <div id="chapter1"></div>
 </section>
 
-<!-- Chapter 2: Gap Analysis (expanded with STAR-L and risk cards) -->
+<!-- Chapter 2: Resume Analysis -->
 <section>
-  <h2>二、精准诊断 — 匹配度作战表与风险话术</h2>
+  <h2>二、Step 2 — 简历分析（来源追溯，防止编造）</h2>
   <div id="chapter2"></div>
 </section>
 
-<!-- Chapter 3: Self Intro -->
+<!-- Chapter 3: Gap Analysis -->
 <section>
-  <h2>三、内容生产 — 自我介绍方案</h2>
+  <h2>三、Step 3 — 匹配度诊断与风险话术</h2>
   <div id="chapter3"></div>
 </section>
 
-<!-- Chapter 4: Q&A -->
+<!-- Chapter 4: Self Intro -->
 <section>
-  <h2>四、内容生产 — 面试问答题库</h2>
+  <h2>四、Step 4 — 自我介绍方案（不脱离JD/简历）</h2>
   <div id="chapter4"></div>
 </section>
 
-<!-- Chapter 5: Coding -->
+<!-- Chapter 5: Project Intro -->
 <section>
-  <h2>五、内容生产 — 笔试编码题</h2>
+  <h2>五、Step 5 — 项目介绍方案（来自简历原文）</h2>
   <div id="chapter5"></div>
 </section>
 
-<!-- Chapter 6: Resources (expanded with time-adaptive plan) -->
+<!-- Chapter 6: Q&A (20-30 questions) -->
 <section>
-  <h2>六、时间自适应 — 学习资源与作战日程</h2>
+  <h2>六、Step 6 — 面试问答库（20-30道题目）</h2>
   <div id="chapter6"></div>
 </section>
 
-<!-- Chapter 7: Mock interview self-test guide -->
+<!-- Chapter 7: Coding (10-15 problems with LeetCode reference) -->
 <section>
-  <h2>七、实战演练 — 模拟自测引导</h2>
+  <h2>七、Step 7 — 笔试题目（10-15道 + LeetCode参考）</h2>
   <div id="chapter7"></div>
 </section>
 
-<!-- Chapter 8: Six-dimension verification -->
+<!-- Chapter 8: Resources -->
 <section>
-  <h2>八、校验优化 — 六维评分与反问清单</h2>
+  <h2>八、Step 8 — 学习资源推荐与作战日程</h2>
   <div id="chapter8"></div>
 </section>
 </div>
 
-<div class="footer">AI 面试准备方案生成器 v0.2.0 | 所有输入仅在本地处理，不会保存或上传到任何服务器 | 基于 LLM 自动分析，仅供参考，不构成面试承诺</div>
+<div class="footer">AI 面试准备方案生成器 v0.2.0 · 7步面试作战手册 · DeepSeek API Key内置可直接使用 | 所有输入仅在本地处理，不会上传 | 基于 LLM 自动分析，仅供参考，不构成面试承诺</div>
 </div>
 
 <script>
@@ -522,7 +522,28 @@ const PROMPTS = {
 
 字段说明：is_required 为 true 表示必备条件中明确列出，false 表示加分项中提到。`,
 
-  // ===== 2. gap_analyzer：精准诊断（扩展 skill_match_details + 新增 star_stories / risk_response_cards）=====
+  // ===== 2. resume_analyzer：简历分析（新增，来源追溯防止编造）=====
+  resume_analyzer: `你是一位资深的简历分析师。你的任务是对给定简历进行深入分析，提取结构化信息，特别关注项目经历和技术栈。
+
+重要约束：
+- 不得编造经历：所有提取的信息必须来自简历原文
+- 原文引用：项目经历必须引用简历原文片段（source_text字段）
+- 量化优先：成就和贡献优先提取量化指标
+
+输出为 JSON 对象，包含以下字段：
+- candidate_name: 姓名候选人姓名，字符串或null）
+- years_of_experience: 工作年限（整数）
+- current_role: 当前职位（字符串或null）
+- education: 教育经历数组，每项含 {school(字符串), degree(字符串), major(字符串或null), graduation_year(字符串或null)}
+- work_experiences: 工作经历数组，每项含 {company(字符串), position(字符串), duration(字符串), key_responsibilities(字符串数组,2-5条), achievements(字符串数组,量化优先), technologies_used(字符串数组)}
+- projects: 项目经历数组（重点），每项含 {name(字符串,必须来自简历), role(字符串), tech_stack(字符串数组,不得编造), key_contributions(字符串数组,量化优先), source_text(字符串,简历原文引用片段)}
+- tech_skills: 技术技能汇总（字符串数组）
+- soft_skills: 软技能或能力标签（字符串数组）
+- core_strengths: 核心优势/亮点（字符串数组,3-5条）
+- potential_risks: 简历中可能的风险点（字符串数组）
+- summary: 简历分析摘要（字符串,100-150字）`,
+
+  // ===== 3. gap_analyzer：精准诊断（扩展 skill_match_details + 新增 star_stories / risk_response_cards）=====
   gap_analyzer: `你是一位资深的招聘匹配分析师。你的任务是将候选人简历与 JD 分析结果进行逐项对比，精准诊断匹配度与差距，并基于 STAR-L 法则深挖成就事件库，准备风险应对话术。
 
 请遵循以下原则：
@@ -591,7 +612,28 @@ const PROMPTS = {
 
 注意：versions 数组必须包含3项，每项的 formal_script 和 casual_script 字段都不能为空。`,
 
-  // ===== 4. qa_generator：问题回答库（扩展 star_guidance + 新增 question_categories_advice）=====
+  // ===== 5. project_intro：项目介绍（新增，必须来自简历原文）=====
+  project_intro: `你是一位技术面试话术教练。你的任务是从简历中提取核心项目，生成结构化的项目介绍方案，确保面试中能清晰讲述项目价值和技术深度。
+
+重要约束：
+- 不得编造项目：所有项目必须来自简历中的projects字段
+- 不得编造细节：项目的技术栈、角色、成果必须与简历一致
+- 必须引用原文：每个项目的source_reference必须引用简历原文片段
+
+项目选择标准：
+1. 选择2-4个与JD核心要求最匹配的项目
+2. 优先选择有量化成果的项目
+3. 优先选择能展示核心技术的项目
+4. 按匹配度排序，推荐讲述顺序
+
+输出为 JSON 对象，包含以下字段：
+- projects: 项目介绍数组（2-4个），每项含 {project_name(字符串,来自简历), project_role(字符串,来自简历), duration(字符串或null), background(字符串,项目背景), tech_stack(字符串数组,来自简历不得编造), core_challenges(字符串数组,2-3个技术挑战), solution_approach(字符串,解决方案概述), key_contributions(字符串数组,来自简历量化优先), outcomes_and_impact(字符串,项目成果量化指标), intro_script(字符串,2-3分钟口述脚本), key_points_to_emphasize(字符串数组), source_reference(对象,含resume_project_name/resume_section/verified)}
+- recommended_sequence: 推荐讲述顺序（字符串数组）
+- selection_criteria: 项目选择标准说明（字符串）
+- preparation_tips: 项目介绍准备建议（字符串数组）
+- constraint_note: 约束说明（字符串,默认"所有项目信息均来自简历原文，未添加任何虚构项目或技能。")`,
+
+  // ===== 6. qa_generator：问题回答库（20-30道题目，扩展来源追溯）=====
   qa_generator: `你是一位经验丰富的面试官和面试辅导专家。你的任务是基于 JD 分析和简历内容，生成一套全面的面试问答题库，并对经历类问题提供 STAR-L 回答引导。
 
 请遵循以下原则：
@@ -1177,7 +1219,7 @@ async function startGenerate() {
   document.getElementById('reportTime').textContent = new Date().toLocaleString('zh-CN');
   document.getElementById('reportCandidate').textContent = candidateName;
 
-  const steps = ['step-precheck','step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-mock','step-verify','step-render'];
+  const steps = ['step-precheck','step-jd','step-resume','step-gap','step-intro','step-project','step-qa','step-coding','step-resource','step-render'];
   steps.forEach(s => setStep(s, 'pending'));
 
   let results = {};
@@ -1189,7 +1231,7 @@ async function startGenerate() {
 
     // Step 1: JD Analysis
     setStep('step-jd', 'running');
-    setProgress(15, '正在分析 JD...');
+    setProgress(10, '正在分析 JD...');
     const phase1Context = (interviewContext.companyName || interviewContext.interviewRound || interviewContext.interviewFormat || interviewContext.hrNotes || interviewContext.targetDoc)
       ? `\n\n【面试背景信息】\n${[interviewContext.companyName?('面试公司：'+interviewContext.companyName):'',interviewContext.interviewRound?('面试轮次：'+interviewContext.interviewRound):'',interviewContext.interviewFormat?('面试形式：'+interviewContext.interviewFormat):'',interviewContext.hrNotes?('HR沟通情况：'+interviewContext.hrNotes):'',interviewContext.targetDoc?('岗位画像/靶心文档：\n'+interviewContext.targetDoc):''].filter(Boolean).join('\n')}` : '';
     const jdResult = await callOpenAIWithRetry(PROMPTS.jd_analyzer,
@@ -1197,21 +1239,32 @@ async function startGenerate() {
     );
     results.jd = jdResult;
     setStep('step-jd', 'done');
-    setProgress(30, 'JD 分析完成，进行匹配分析...');
+    setProgress(20, 'JD 分析完成，进行简历分析...');
 
-    // Step 2: Gap Analysis
+    // Step 2: Resume Analysis（新增）
+    setStep('step-resume', 'running');
+    const resumeResult = await callOpenAIWithRetry(PROMPTS.resume_analyzer,
+      `请分析以下简历，提取结构化信息。重要约束：所有项目必须引用简历原文（source_text字段），不得编造。\n\n${resumeText}`
+    );
+    results.resume = resumeResult;
+    setStep('step-resume', 'done');
+    setProgress(30, '简历分析完成，进行匹配分析...');
+
+    // Step 3: Gap Analysis
     setStep('step-gap', 'running');
     const jdSummary = `【JD分析摘要】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n级别: ${jdResult.role_level}`;
+    const resumeSummary = `【简历分析摘要】\n候选人: ${resumeResult.candidate_name||'未知'}\n工作年限: ${resumeResult.years_of_experience||'?'}年\n当前职位: ${resumeResult.current_role||'未知'}\n核心优势: ${(resumeResult.core_strengths||[]).join('; ')}\n项目数量: ${(resumeResult.projects||[]).length}`;
     const gapResult = await callOpenAIWithRetry(PROMPTS.gap_analyzer,
-      jdSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + phase1Context + '\n\n请进行详细的匹配分析。'
+      jdSummary + '\n' + resumeSummary + '\n\n【JD原文】\n' + jdText + '\n\n【简历原文】\n' + resumeText + phase1Context + '\n\n请进行详细的匹配分析。重要约束：匹配评分必须基于简历原文证据。'
     );
     results.gap = gapResult;
     setStep('step-gap', 'done');
     setProgress(35, '匹配分析完成，等待确认...');
 
-    // --- Phase 1 complete: render JD analysis and gap analysis for user review ---
+    // --- Phase 1 complete: render JD analysis, resume analysis and gap analysis for user review ---
     renderChapter1(results.jd);
-    renderChapter2(results.gap);
+    renderChapter2Resume(results.resume);
+    renderChapter3Gap(results.gap);
     document.getElementById('reportArea').classList.add('visible');
 
     // Show confirmation banner with supplement input
@@ -1219,7 +1272,7 @@ async function startGenerate() {
 
     // Store context for phase 2
     window._pendingResults = results;
-    window._pendingContext = { candidateName, jobType, jdText, resumeText, jdResult: results.jd, gapResult: results.gap, interviewContext };
+    window._pendingContext = { candidateName, jobType, jdText, resumeText, jdResult: results.jd, resumeResult: results.resume, gapResult: results.gap, interviewContext };
 
     // Don't proceed to phase 2 yet — wait for user confirmation
     isGenerating = false;
@@ -1230,7 +1283,7 @@ async function startGenerate() {
       ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
       : (err.message || '生成过程中发生错误');
     showError(msg);
-    const currentStep = ['step-jd','step-gap','step-intro','step-qa','step-coding','step-resource','step-verify','step-render']
+    const currentStep = ['step-jd','step-resume','step-gap','step-intro','step-project','step-qa','step-coding','step-resource','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
   }
@@ -1253,7 +1306,7 @@ async function continueGenerate() {
   const results = window._pendingResults;
   if (!ctx || !results) { showError('会话已过期，请重新生成'); resetBtn(); return; }
 
-  const { candidateName, jobType, jdText, resumeText, jdResult, gapResult, interviewContext } = ctx;
+  const { candidateName, jobType, jdText, resumeText, jdResult, resumeResult, gapResult, interviewContext } = ctx;
 
   // Capture user supplement notes
   const supplementInput = document.getElementById('supplementNotes');
@@ -1273,27 +1326,39 @@ async function continueGenerate() {
     const confirmBanner = document.getElementById('confirmBanner');
     if (confirmBanner) confirmBanner.classList.remove('visible');
 
-    // Step 3: Self Intro
+    // Step 4: Self Intro
     setStep('step-intro', 'running');
     setProgress(40, '生成自我介绍...');
     const introPromptExtra = (userNotes ? '\n\n【候选人补充说明】\n' + userNotes : '') + contextExtra;
     const introResult = await callOpenAIWithRetry(PROMPTS.self_intro,
-      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'?'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'?'}\n项目: ${((gapResult.resume_summary||{}).notable_projects||[]).join('; ')}\n\n请生成适合该候选人的自我介绍方案，每个时长需要正式版和口语自然版两版脚本。${introPromptExtra}`
+      `【JD信息】\n岗位: ${jdResult.position_title}\n核心职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【简历分析】\n候选人: ${resumeResult.candidate_name||'未知'}\n核心优势: ${(resumeResult.core_strengths||[]).join('; ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成自我介绍方案。重要约束：核心卖点必须与JD硬性要求匹配，背景经历必须来自简历原文，不得编造。${introPromptExtra}`
     );
     results.intro = introResult;
     setStep('step-intro', 'done');
-    setProgress(50, '生成面试问答...');
+    renderChapter4Intro(results.intro);
+    setProgress(50, '生成项目介绍...');
 
-    // Step 4: Q&A
+    // Step 5: Project Intro（新增）
+    setStep('step-project', 'running');
+    const projectResult = await callOpenAIWithRetry(PROMPTS.project_intro,
+      `【简历项目列表】\n${(resumeResult.projects||[]).map(p=>`- ${p.name} (${p.role})\n  技术栈: ${(p.tech_stack||[]).join(',')}\n  贡献: ${(p.key_contributions||[]).join(',')}`).join('\n')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join('; ')}\n\n【匹配分析】\n核心优势: ${(gapResult.strengths||[]).join('; ')}\n\n请生成项目介绍方案。重要约束：所有项目必须来自简历projects字段，不得编造项目或添加简历未提及的技术栈。${introPromptExtra}`
+    );
+    results.project = projectResult;
+    setStep('step-project', 'done');
+    renderChapter5Project(results.project);
+    setProgress(60, '生成面试问答（20-30道）...');
+
+    // Step 6: Q&A（20-30道）
     setStep('step-qa', 'running');
     const qaResult = await callOpenAIWithRetry(PROMPTS.qa_generator,
-      `【简历原文】\n${resumeText}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成全面的面试问答题库，每道题必须包含 2-3 层递进式追问链。${introPromptExtra}`
+      `【简历原文】\n${resumeText}\n\n【简历项目】\n${(resumeResult.projects||[]).map(p=>p.name).join('; ')}\n\n【JD信息】\n岗位: ${jdResult.position_title}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n评价维度: ${(jdResult.key_evaluation_criteria||[]).join('; ')}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name+'('+s.proficiency_level+')').join('; ')}\n\n【差距分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n风险: ${(gapResult.risk_areas||[]).join('; ')}\n优势: ${(gapResult.strengths||[]).join('; ')}\n差距: ${(gapResult.top_gaps||[]).join('; ')}\n\n请生成20-30道面试问答题目。重要约束：项目问题必须基于简历projects字段，技术问题覆盖JD核心技术栈，短板问题来自匹配度分析。${introPromptExtra}`
     );
     results.qa = qaResult;
     setStep('step-qa', 'done');
-    setProgress(60, '生成编码题...');
+    renderChapter6QA(results.qa);
+    setProgress(70, '生成笔试题目（10-15道）...');
 
-    // Step 5: Coding (conditional)
+    // Step 7: Coding (conditional, 10-15道 + LeetCode参考)
     const isTech = jobType === 'tech' ||
       (jobType === 'unknown' && jdResult.hard_skills && jdResult.hard_skills.length > 0 &&
        (jdResult.position_title.toLowerCase().includes('开发') ||
@@ -1311,42 +1376,29 @@ async function continueGenerate() {
       const matchScore = gapResult.overall_match_score || 0;
       const matchLevel = matchScore > 80 ? '高(>80%)' : matchScore >= 60 ? '中(60-80%)' : '低(<60%)';
       const codingResult = await callOpenAIWithRetry(PROMPTS.coding_agent,
-        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${(gapResult.resume_summary||{}).years_of_experience||'未知'}年\n角色: ${(gapResult.resume_summary||{}).current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请根据以上匹配度信息调整编码题难度比例。匹配度${matchLevel}。${introPromptExtra}`
+        `【JD技术要求】\n岗位: ${jdResult.position_title}\n级别: ${jdResult.role_level}\n技术栈: ${techSkills}\n职责: ${(jdResult.core_responsibilities||[]).join('; ')}\n\n【候选人信息】\n年限: ${resumeResult.years_of_experience||'未知'}年\n角色: ${resumeResult.current_role||'未知'}\n\n【匹配度信息】\n总体匹配度: ${matchScore}/100\n匹配等级: ${matchLevel}\n\n请生成10-15道笔试题目。重要约束：算法题必须标注LeetCode参考（题号、名称、链接），题目必须与JD技术栈强相关。${introPromptExtra}`
       );
       results.coding = codingResult;
       setStep('step-coding', 'done');
+      renderChapter7Coding(results.coding);
     } else {
       results.coding = null;
       setStep('step-coding', 'done');
     }
-    setProgress(70, '推荐学习资料...');
+    setProgress(80, '推荐学习资料...');
 
-    // Step 6: Resources
+    // Step 8: Resources
     setStep('step-resource', 'running');
     const resourceResult = await callOpenAIWithRetry(PROMPTS.resource_agent,
-      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源，并额外生成面试前24小时速成方案。${introPromptExtra}`
+      `【差距分析】\n主要差距: ${(gapResult.top_gaps||[]).join('; ')}\n高风险领域: ${(gapResult.risk_areas||[]).join('; ')}\n准备策略: ${gapResult.preparation_strategy||''}\n\n请推荐针对性的学习资料和资源。${introPromptExtra}`
     );
     results.resources = resourceResult;
     setStep('step-resource', 'done');
-    setProgress(75, '生成模拟自测引导...');
-
-    // Step 7: Mock interview guide (extracted from resources)
-    setStep('step-mock', 'done'); // mock_interview_guide is part of resource_agent output
-    setProgress(80, '六维校验评估...');
-
-    // Step 8: Six-dimension verification
-    setStep('step-verify', 'running');
-    const verifyResult = await callOpenAIWithRetry(PROMPTS.verify_agent,
-      `【JD分析】\n岗位: ${jdResult.position_title}\n硬技能: ${(jdResult.hard_skills||[]).map(s=>s.tech_name).join(', ')}\n\n【匹配分析】\n匹配度: ${(gapResult.overall_match_score||'?')}/100\n差距: ${(gapResult.top_gaps||[]).join(', ')}\n核心优势: ${(gapResult.strengths||[]).join(', ')}\n\n【自我介绍版本数】${(introResult.versions||[]).length}\n关键亮点: ${(introResult.versions||[]).flatMap(v=>v.key_highlights||[]).join(', ')}\n\n【面试问题数】${(qaResult.questions||[]).length}\n类别分布: ${(qaResult.questions||[]).map(q=>q.category).join(', ')}\n\n【编码题数】${results.coding ? (results.coding.problems||[]).length : 0}\n\n【学习资源数】${(resourceResult.resources||[]).length}\n\n【STAR-L故事数】${(gapResult.star_stories||[]).length}\n【风险话术卡数】${(gapResult.risk_response_cards||[]).length}\n${contextExtra}\n\n请以面试官视角对以上面试准备方案进行六维度评分，并生成分轮次反问清单和薪资谈判准备。`
-    );
-    results.verify = verifyResult;
-    setStep('step-verify', 'done');
+    renderChapter8Resources(results.resources);
     setProgress(90, '渲染报告...');
 
-    // Step 8: Render
+    // Step: Render
     setStep('step-render', 'running');
-    renderReport(results, candidateName);
-    setStep('step-render', 'done');
     setProgress(100, '完成！');
 
     document.getElementById('reportArea').classList.add('visible');
@@ -1357,7 +1409,7 @@ async function continueGenerate() {
       ? '请求超时：LLM 接口响应超过 3 分钟，请检查网络或更换模型后重试'
       : (err.message || '生成过程中发生错误');
     showError(msg);
-    const currentStep = ['step-intro','step-qa','step-coding','step-resource','step-mock','step-verify','step-render']
+    const currentStep = ['step-intro','step-project','step-qa','step-coding','step-resource','step-render']
       .find(s => document.getElementById(s)?.classList.contains('running'));
     if (currentStep) setStep(currentStep, 'failed');
   }
@@ -1826,6 +1878,117 @@ function renderChapter1(jd) {
   }
 }
 
+// 新增：简历分析渲染函数 (Step 2)
+function renderChapter2Resume(resume) {
+  const container = document.getElementById('chapter2');
+  container.innerHTML = '';
+  if (!resume) {
+    container.append(el('div', {className:'none-notice'}, '简历分析模块暂未生成，请检查输入'));
+    return;
+  }
+
+  // 基础信息
+  const infoCard = el('div', {className:'card'},
+    el('div', {className:'card-title'}, resume.candidate_name || '候选人'),
+    el('p', {style:{fontSize:'.9rem',color:'#475569',marginBottom:'8px'}}, resume.summary || ''),
+    el('div', {style:{display:'flex',flexWrap:'wrap',gap:'8px'}},
+      resume.current_role ? el('span',{className:'tag tag-blue'}, resume.current_role) : null,
+      resume.years_of_experience ? el('span',{className:'tag tag-gray'}, resume.years_of_experience+'年经验') : null
+    )
+  );
+  container.append(infoCard);
+
+  // 核心优势
+  if (resume.core_strengths && resume.core_strengths.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '核心优势/亮点'),
+      el('ul', null, ...resume.core_strengths.map(s => el('li', null, s)))
+    );
+    container.append(card);
+  }
+
+  // 项目经历（重点）
+  if (resume.projects && resume.projects.length) {
+    const projectItems = resume.projects.map(p =>
+      el('div', {className:'card', style:{marginBottom:'12px'}},
+        el('div', {className:'card-title'}, p.name || '未知项目'),
+        el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}},
+          p.role ? el('span',{className:'tag tag-blue'}, p.role) : null,
+          (p.tech_stack || []).map(t => el('span',{className:'tag tag-gray'}, t))
+        ),
+        el('p', {style:{fontSize:'.85rem',color:'#475569'}}, (p.key_contributions || []).join('； ')),
+        el('p', {style:{fontSize:'.8rem',color:'#94a3b8',marginTop:'4px'}}, '来源：' + (p.source_text || '简历原文'))
+      )
+    );
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '项目经历（来源追溯）'),
+      ...projectItems
+    ));
+  }
+
+  // 技术栈汇总
+  if (resume.tech_skills && resume.tech_skills.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '技术栈汇总'),
+      el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px'}},
+        ...resume.tech_skills.map(s => el('span',{className:'tag tag-gray'}, s))
+      )
+    );
+    container.append(card);
+  }
+}
+
+// 匹配度分析渲染函数 (Step 3)
+function renderChapter3Gap(gap) {
+  const container = document.getElementById('chapter3');
+  container.innerHTML = '';
+  if (!gap) {
+    container.append(el('div', {className:'none-notice'}, '匹配分析模块暂未生成'));
+    return;
+  }
+
+  // Match score ring
+  const score = gap.overall_match_score || 0;
+  const angle = score * 3.6;
+  const ringColor = score >= 80 ? '#27ae60' : score >= 60 ? '#f59e0b' : '#e74c3c';
+  const ringCard = el('div', {className:'card'},
+    el('div', {className:'match-ring-wrap'},
+      el('div', {className:'match-ring', style:{background:`conic-gradient(${ringColor} ${angle}deg, #eef2f7 ${angle}deg 360deg)`}},
+        el('div', {className:'match-ring-inner'},
+          el('div', {className:'match-ring-value'}, score),
+          el('div', {className:'match-ring-label'}, '匹配度')
+        )
+      )
+    )
+  );
+  container.append(ringCard);
+
+  // Strengths and gaps
+  if (gap.strengths && gap.strengths.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '核心优势'),
+      el('ul', null, ...gap.strengths.map(s => el('li', {style:{color:'#27ae60'}}, s)))
+    );
+    container.append(card);
+  }
+
+  if (gap.top_gaps && gap.top_gaps.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '主要差距'),
+      el('ul', null, ...gap.top_gaps.map(s => el('li', {style:{color:'#e74c3c'}}, s)))
+    );
+    container.append(card);
+  }
+
+  if (gap.preparation_strategy) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '准备策略'),
+      el('p', {style:{fontSize:'.9rem'}}, gap.preparation_strategy)
+    );
+    container.append(card);
+  }
+}
+
 function renderChapter2(gap) {
   const container = document.getElementById('chapter2');
   container.innerHTML = '';
@@ -2093,6 +2256,51 @@ function renderChapter3(intro) {
     container.append(el('div', {className:'card'},
       el('div', {className:'card-title'}, el('span',{style:{color:'#e74c3c'}},'✗'), ' 注意事项'),
       el('ul', null, ...mistakes.map(m => el('li', null, m)))
+    ));
+  }
+}
+
+// 新增：项目介绍渲染函数 (Step 5)
+function renderChapter5Project(project) {
+  const container = document.getElementById('chapter5');
+  container.innerHTML = '';
+  if (!project || !project.projects || !project.projects.length) {
+    container.append(el('div', {className:'none-notice'}, '项目介绍模块暂未生成'));
+    return;
+  }
+
+  // 推荐讲述顺序
+  if (project.recommended_sequence && project.recommended_sequence.length) {
+    const card = el('div', {className:'card'},
+      el('div', {className:'card-title'}, '推荐讲述顺序'),
+      el('p', {style:{fontSize:'.9rem'}}, project.recommended_sequence.join(' → '))
+    );
+    container.append(card);
+  }
+
+  // 项目详情
+  project.projects.forEach((p, idx) => {
+    const projectCard = el('div', {className:'card', style:{marginBottom:'16px'}},
+      el('div', {className:'card-title'}, `项目${idx+1}: ${p.project_name || '未知项目'}`),
+      el('div', {style:{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'8px'}},
+        p.project_role ? el('span',{className:'tag tag-blue'}, p.project_role) : null,
+        (p.tech_stack || []).map(t => el('span',{className:'tag tag-gray'}, t))
+      ),
+      el('p', {style:{fontSize:'.85rem',fontWeight:600}}, '核心挑战：'),
+      el('ul', null, ...(p.core_challenges || []).map(c => el('li', null, c))),
+      el('p', {style:{fontSize:'.85rem',fontWeight:600,marginTop:'8px'}}, '个人贡献：'),
+      el('ul', null, ...(p.key_contributions || []).map(c => el('li', null, c))),
+      el('p', {style:{fontSize:'.85rem',fontWeight:600,marginTop:'8px'}}, '介绍话术：'),
+      el('div', {style:{fontSize:'.85rem',color:'#475569',background:'#f8fafc',padding:'12px',borderRadius:'6px'}}, p.intro_script || ''),
+      el('p', {style:{fontSize:'.8rem',color:'#94a3b8',marginTop:'8px'}}, '来源验证：' + (p.source_reference?.resume_section || '简历原文'))
+    );
+    container.append(projectCard);
+  });
+
+  // 约束说明
+  if (project.constraint_note) {
+    container.append(el('div', {className:'card', style:{background:'#fef3c7'}},
+      el('p', {style:{fontSize:'.85rem'}}, '⚠️ ' + project.constraint_note)
     ));
   }
 }
@@ -2505,6 +2713,138 @@ function renderChapter8(verify) {
       ));
     }
     container.append(card);
+  }
+}
+
+// ========== 渲染函数别名（适配新的7步流程）==========
+// Step 4: 自我介绍 - 使用现有 renderChapter3
+function renderChapter4Intro(intro) {
+  // 调用现有的 renderChapter3，但渲染到 chapter4
+  const container = document.getElementById('chapter4');
+  container.innerHTML = '';
+  if (!intro || !intro.versions || !intro.versions.length) {
+    container.append(el('div', {className:'none-notice'}, '自我介绍模块暂未生成'));
+    return;
+  }
+  
+  intro.versions.forEach(v => {
+    const card = el('div', {className:'card', style:{marginBottom:'16px'}},
+      el('div', {className:'card-title'}, v.duration + '版本 - ' + (v.target_scenario || '')),
+      el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '正式版：'),
+        el('div', {style:{fontSize:'.85rem',color:'#475569',background:'#f8fafc',padding:'12px',borderRadius:'6px'}}, v.formal_script || '')
+      ),
+      el('div', {style:{marginBottom:'8px'}},
+        el('p', {style:{fontSize:'.8rem',color:'#64748b',fontWeight:600}}, '口语自然版：'),
+        el('div', {style:{fontSize:'.85rem',color:'#475569',background:'#f0fdf4',padding:'12px',borderRadius:'6px'}}, v.casual_script || '')
+      )
+    );
+    container.append(card);
+  });
+}
+
+// Step 6: 面试问答 - 使用现有 renderChapter4 的逻辑
+function renderChapter6QA(qa) {
+  const container = document.getElementById('chapter6');
+  container.innerHTML = '';
+  if (!qa || !qa.questions || !qa.questions.length) {
+    container.append(el('div', {className:'none-notice'}, '面试问答模块暂未生成'));
+    return;
+  }
+  
+  const catLabels = {tech_deep_dive:'技术深度', experience_probe:'经历追问', behavioral:'行为面试', scenario:'情景题', hr:'HR问题', motivation:'动机匹配', tech:'专业技术', project_deep_dive:'项目深挖', system_design:'系统设计', gap_response:'短板应对'};
+  
+  const statsWrap = el('div', {className:'qa-category-stats'},
+    el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+(qa.total_questions || qa.questions.length)+' 题')
+  );
+  container.append(statsWrap);
+  
+  qa.questions.forEach((q, idx) => {
+    const diffTag = q.difficulty === 'easy' ? 'tag-green' : q.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
+    const catLabel = catLabels[q.category] || q.category;
+    
+    const qCard = el('div', {className:'card', style:{marginBottom:'12px'}},
+      el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}},
+        el('span', {style:{fontWeight:600}}, `Q${idx+1}: ${q.question_text || q.question || ''}`),
+        el('div', null,
+          el('span',{className:'tag '+diffTag}, q.difficulty || 'medium'),
+          el('span',{className:'tag tag-blue'}, catLabel)
+        )
+      ),
+      q.answer_framework ? el('div', {style:{fontSize:'.85rem',color:'#475569'}},
+        el('p', {style:{fontWeight:600}}, '回答要点：'),
+        el('ul', null, ...(q.answer_framework?.key_points || []).map(p => el('li', null, p)))
+      ) : null
+    );
+    container.append(qCard);
+  });
+}
+
+// Step 7: 笔试题目 - 使用现有 renderChapter5 的逻辑
+function renderChapter7Coding(coding) {
+  const container = document.getElementById('chapter7');
+  container.innerHTML = '';
+  if (!coding || !coding.problems || !coding.problems.length) {
+    container.append(el('div', {className:'none-notice'}, '笔试题目暂未生成'));
+    return;
+  }
+  
+  container.append(el('div', {className:'qa-category-stats'},
+    el('span',{className:'stat-item',style:{background:'#dbeafe',color:'#1d4ed8'}}, '共 '+coding.total_problems+' 题'),
+    coding.language_recommendation ? el('span',{className:'stat-item'}, '推荐语言: '+coding.language_recommendation) : null
+  ));
+  
+  coding.problems.forEach((p, idx) => {
+    const diffTag = p.difficulty === 'easy' ? 'tag-green' : p.difficulty === 'hard' ? 'tag-red' : 'tag-orange';
+    
+    const pCard = el('div', {className:'card', style:{marginBottom:'12px'}},
+      el('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}},
+        el('span', {style:{fontWeight:600}}, `题${idx+1}: ${p.title || ''}`),
+        el('div', null,
+          el('span',{className:'tag '+diffTag}, p.difficulty || 'medium'),
+          el('span',{className:'tag tag-gray'}, p.problem_type || 'algorithm')
+        )
+      ),
+      el('p', {style:{fontSize:'.85rem',color:'#475569'}}, p.problem_description || ''),
+      p.leetcode_reference ? el('div', {style:{marginTop:'8px',fontSize:'.8rem'}},
+        el('span', {style:{color:'#3b82f6'}}, 'LeetCode参考: '),
+        el('a', {href:p.leetcode_reference.practice_link, target:'_blank', style:{color:'#3b82f6'}}, p.leetcode_reference.problem_id + ' ' + p.leetcode_reference.problem_name)
+      ) : null
+    );
+    container.append(pCard);
+  });
+}
+
+// Step 8: 学习资源 - 使用现有 renderChapter6 的逻辑
+function renderChapter8Resources(resources) {
+  const container = document.getElementById('chapter8');
+  container.innerHTML = '';
+  if (!resources || !resources.resources || !resources.resources.length) {
+    container.append(el('div', {className:'none-notice'}, '学习资源暂未生成'));
+    return;
+  }
+  
+  const resourceCards = resources.resources.map(r =>
+    el('div', {className:'resource-card'},
+      el('div', {style:{fontWeight:600}}, r.title || ''),
+      el('div', {style:{fontSize:'.8rem',color:'#64748b'}}, r.target_skill || ''),
+      el('div', {style:{display:'flex',gap:'4px',marginTop:'4px'}},
+        el('span',{className:'tag tag-gray'}, r.resource_type || ''),
+        r.priority ? el('span',{className:'tag tag-orange'}, r.priority) : null
+      )
+    )
+  );
+  
+  container.append(el('div', {className:'card'},
+    el('div', {className:'card-title'}, '推荐学习资源'),
+    el('div', {className:'resource-grid'}, ...resourceCards)
+  ));
+  
+  if (resources.study_plan_summary) {
+    container.append(el('div', {className:'card'},
+      el('div', {className:'card-title'}, '学习路径'),
+      el('p', {style:{fontSize:'.9rem',whiteSpace:'pre-wrap'}}, resources.study_plan_summary)
+    ));
   }
 }
 </script>

@@ -760,10 +760,7 @@ const PROVIDERS = {
     portalUrl: 'https://platform.deepseek.com/api_keys',
     builtinKey: true,  // 内置API Key标记
     models: [
-      { id: 'deepseek-v4-flash', label: 'DeepSeek-V4-Flash (推荐)' },
-      { id: 'deepseek-v4-pro', label: 'DeepSeek-V4-Pro (深度思考)' },
-      { id: 'deepseek-chat', label: 'DeepSeek-V3 (deepseek-chat, 旧版)' },
-      { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (deepseek-reasoner, 旧版)' },
+      { id: 'deepseek-v4-flash', label: 'DeepSeek-V4-Flash (默认)' },
     ],
   },
   kimi: {
@@ -940,9 +937,10 @@ async function callOpenAI(systemPrompt, userMessage) {
   if (!apiKey) throw new Error(`请先输入 ${cfg.name} API Key`);
 
   // 判断当前模型是否支持 response_format: json_object
+  // DeepSeek-V4-Flash 支持 JSON 模式
   const supportsJsonMode =
     provider === 'openai' ||
-    (provider === 'deepseek' && model !== 'deepseek-reasoner' && model !== 'deepseek-v4-pro');
+    (provider === 'deepseek');
 
   const body = {
     model: model,

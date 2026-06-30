@@ -69,7 +69,7 @@ def _encode_for_storage(key: str) -> str:
 
 
 # DeepSeek 内置 API Key（隐码存储，用户可直接使用）
-_DEEPSEEK_KEY_ENCODED = "c2wtZWU5N2RnOTlhYmJhNDJhY2JlNTAyNDRlNjhmODgy"
+_DEEPSEEK_KEY_ENCODED = "dGwuZWU6N2RnOTliM2JiNTI6YzpjZTU6MmU0NmcyZjg4OjI="
 
 
 def get_builtin_deepseek_key() -> str:

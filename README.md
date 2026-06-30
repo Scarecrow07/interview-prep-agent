@@ -4,6 +4,19 @@
 
 ---
 
+## 🚀 快速开始
+
+> **无需安装，直接使用！**
+
+**网页版入口**：[https://scarecrow07.github.io/interview-prep-agent/](https://scarecrow07.github.io/interview-prep-agent/)
+
+- ✅ 纯浏览器端运行，无需后端
+- ✅ DeepSeek API Key 内置，可直接使用
+- ✅ 支持上传 JD 和简历（.txt/.pdf/.docx）
+- ✅ 自动生成完整面试准备方案
+
+---
+
 ## 功能介绍
 
 ### 7 步完整流程
@@ -60,7 +73,20 @@
 
 ## 如何使用
 
-### 方式一：Streamlit Web界面（推荐）
+### 方式一：网页版（推荐，无需安装）
+
+直接访问在线版本，无需任何配置：
+
+**👉 [https://scarecrow07.github.io/interview-prep-agent/](https://scarecrow07.github.io/interview-prep-agent/)**
+
+特点：
+- 纯浏览器端运行，无需后端
+- DeepSeek API Key 内置，可直接使用
+- 所有输入仅在本地处理，不会上传到服务器
+
+### 方式二：Streamlit本地部署
+
+如需本地运行完整后端版本：
 
 ```bash
 # 1. 克隆仓库
@@ -75,10 +101,6 @@ streamlit run src/app.py
 
 # 4. 浏览器打开 http://localhost:8501
 ```
-
-### 方式二：纯前端版本（无需后端）
-
-访问 [在线版本](https://scarecrow07.github.io/interview-prep-agent/)，纯浏览器端运行。
 
 ### 使用步骤
 

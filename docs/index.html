@@ -927,6 +927,9 @@ async function callOpenAI(systemPrompt, userMessage) {
   const cfg = PROVIDERS[provider];
   const userApiKey = document.getElementById('apiKey').value.trim();
   const model = document.getElementById('modelSelect').value;
+  
+  // 调试日志：显示实际使用的model值
+  console.log('[DEBUG] callOpenAI - provider:', provider, 'model:', model);
 
   // Use builtin key for DeepSeek if no user key provided
   let apiKey = userApiKey;
@@ -972,6 +975,8 @@ async function callOpenAI(systemPrompt, userMessage) {
   }
 
   const data = await resp.json();
+  // 调试日志：显示API返回的model字段
+  console.log('[DEBUG] API response - model:', data.model, 'requested:', body.model);
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error(`${cfg.name} 响应为空`);
   return safeParseJSON(content);

@@ -637,29 +637,35 @@ const PROMPTS = {
 
 输出为 JSON，包含：
 - total_questions: 整数
-- questions: 数组，每项含 {question_number(整数), category(字符串), difficulty(字符串:easy/medium/hard), question_text(字符串), evaluation_dimension(字符串), answer_framework(字符串或null), reference_answer_key_points(字符串数组), suggested_time_limit(字符串), follow_up_chain(对象数组,每项含{layer(整数1-3), follow_up_question(字符串), expected_direction(字符串,期望候选人回答的方向), red_flag(字符串,该层回答不佳的危险信号)}), follow_up_hints(字符串数组或null), star_guidance(对象或null:对经历类问题给出STAR-L引导,含{situation_hint(字符串,情境描述提示), task_hint(字符串,任务说明提示), action_hint(字符串,行动举措提示,突出个人决策), result_hint(字符串,结果量化提示), learned_hint(字符串,方法论提炼提示)};对非经历类问题为null)}
+- questions: 数组，每项含 {question_number(整数), category(字符串), difficulty(字符串:easy/medium/hard), question_text(字符串), evaluation_dimension(字符串), answer_framework(对象，必填！包含{intent(字符串,考察意图), structure(字符串,推荐回答结构如"先概括背景→再讲核心做法→最后量化成果"), key_points(字符串数组,高分要点3-5条), pitfalls(字符串数组,需避开的雷区2-3条), sample_response(字符串,完整的示例回答,200-400字,可直接开口讲)}), source_reference(对象,来源追溯,含{jd_requirement(字符串,对应JD要求), resume_section(字符串,对应简历段落), gap_source(字符串或null,对应差距分析)}), suggested_time_limit(字符串), follow_up_chain(对象数组,每项含{layer(整数1-3), follow_up_question(字符串), expected_direction(字符串,期望候选人回答的方向), red_flag(字符串,该层回答不佳的危险信号)}), follow_up_hints(字符串数组或null), star_guidance(对象或null:对经历类问题给出STAR-L引导,含{situation_hint(字符串,情境描述提示), task_hint(字符串,任务说明提示), action_hint(字符串,行动举措提示,突出个人决策), result_hint(字符串,结果量化提示), learned_hint(字符串,方法论提炼提示)};对非经历类问题为null)}
 - focus_areas_advice: 面试准备重点领域建议（字符串数组）
-- question_categories_advice: 按四类分类的准备建议（对象数组，恰好4项），每项含 {category(字符串:professional_skill/project_story/behavioral_scenario/stress_weakness), category_name(字符串:专业能力/项目故事/行为情景/压力短板), preparation_strategy(字符串,该类问题的准备策略), key_focus_points(字符串数组,该类问题的重点关注点), common_pitfalls(字符串数组,常见陷阱)}`,
+- question_categories_advice: 按四类分类的准备建议（对象数组，恰好4项），每项含 {category(字符串:professional_skill/project_story/behavioral_scenario/stress_weakness), category_name(字符串:专业能力/项目故事/行为情景/压力短板), preparation_strategy(字符串,该类问题的准备策略), key_focus_points(字符串数组,该类问题的重点关注点), common_pitfalls(字符串数组,常见陷阱)}
+
+重要约束：每道题的 answer_framework 必须完整，sample_response 必须具体且可直接用于面试回答，不得空泛。`,
 
   // ===== 5. coding_agent：编码出题（保持不变）=====
   coding_agent: `你是一位技术面试的出题专家。你的任务是基于 JD 要求的技术栈和候选人简历中的编程能力，生成适合面试的编码题目。
 
 请遵循以下原则：
-1. 共生成 7 道编码题，每道难度为 easy/medium/hard 之一
+1. 共生成 10-15 道编码题，每道难度为 easy/medium/hard 之一
 2. 难度比例根据候选人匹配度调整（匹配度信息在用户消息中给出）：
-   - 匹配度高(>80%)：侧重 hard，比例为 1 easy + 2 medium + 4 hard
-   - 匹配度中(60-80%)：均衡，比例为 2 easy + 3 medium + 2 hard
-   - 匹配度低(<60%)：侧重 easy 和 medium，比例为 3 easy + 3 medium + 1 hard
-3. 知识点覆盖与 JD 技术栈相关
+   - 匹配度高(>80%)：侧重 hard，比例为 2 easy + 5 medium + 5-8 hard
+   - 匹配度中(60-80%)：均衡，比例为 3 easy + 6 medium + 4-6 hard
+   - 匹配度低(<60%)：侧重 easy 和 medium，比例为 4 easy + 7 medium + 3-4 hard
+3. 知识点覆盖与 JD 技术栈强相关
 4. 参考代码语言优先使用候选人简历中的常用语言
 5. 解题提示从浅入深
+6. 算法题必须标注 LeetCode 参考（题号、名称、链接）
+7. 每道题必须给出评分标准（分维度权重）
 
 输出为 JSON，包含：
-- total_problems: 整数
+- total_problems: 整数（10-15）
 - language_recommendation: 推荐编程语言（字符串）
-- difficulty_distribution: 难度分布说明（字符串）
-- problems: 数组，每项含 {problem_number(整数), title(字符串), difficulty(字符串:easy/medium/hard), estimated_time(字符串), topic_tags(字符串数组), problem_description(字符串), examples(对象数组,每项含{input(字符串),output(字符串)}), constraints(字符串数组), hints(字符串数组), solution_approach(字符串), reference_code_language(字符串), reference_code_snippet(字符串), complexity_analysis(字符串), related_leetcode_problems(字符串数组或null)}
-- preparation_tips: 备考贴士（字符串数组）`,
+- time_estimate_minutes: 预估总时间（整数，分钟）
+- problems: 数组，每项含 {problem_number(整数), title(字符串), problem_type(字符串:algorithm/sql/data_analysis/system_design), difficulty(字符串:easy/medium/hard), expected_time_minutes(整数,预估用时), problem_description(字符串,完整题目描述), input_output_example(对象,含{input(字符串),output(字符串),explanation(字符串或null)}), skills_assessed(字符串数组,考察的技能点), leetcode_reference(对象或null,算法题必填！含{problem_id(字符串,如"LeetCode 1"),problem_name(字符串,如"Two Sum"),practice_link(字符串,完整链接),relevance(字符串,本题与LeetCode原题的差异说明)}), scoring_criteria(对象,必填！含{total_points(整数,默认100),dimensions(数组,每项含{dimension(字符串,评分维度如"正确性/效率/代码风格"),weight(整数,权重百分比),description(字符串,该维度评分说明)})}, hints(字符串数组,解题提示), interview_followup(对象,含{suggested_questions(字符串数组,面试追问方向)})}
+- leetcode_practice_summary: LeetCode练习建议（对象），包含 {recommended_problems(数组,每项含{problem_id,problem_name,practice_link}),practice_strategy(字符串)}
+
+重要约束：算法题必须标注 LeetCode 参考，scoring_criteria 必须完整（至少3个评分维度）。`,
 
   // ===== 6. resource_agent：时间自适应学习策略（保留原字段 + 新增 time_adaptive_plan / mock_interview_guide）=====
   resource_agent: `你是一位职业学习规划师。你的任务是基于差距分析结果，推荐针对性的学习资源，并生成时间自适应学习计划与模拟面试自测引导。
